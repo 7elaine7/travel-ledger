@@ -1,0 +1,63 @@
+/* ============================================================
+   tokens.css — 设计 token（S3-03）
+   值的唯一来源：DESIGN_SPEC.md 2.1 色板 / 2.1.1 分类色 / 2.2 字体 / 9·9.1 字号
+   规则：组件样式只引用本文件变量；改值先进 DESIGN_SPEC，再同步这里。
+   @font-face 放这里，路径相对 css/（mock/ 与根页面引用均可命中 assets/fonts）。
+   ============================================================ */
+
+/* ===== 本地字体（禁 CDN，DESIGN_SPEC 2.2） ===== */
+@font-face{
+  font-family:"FosiTi";
+  src:url("../assets/fonts/fosi-ti.ttf") format("truetype");
+  font-display:block;
+}
+@font-face{
+  font-family:"SiyinSong";
+  src:url("../assets/fonts/SiyinSong-Regular.otf") format("opentype");
+  font-display:block;
+}
+
+:root{
+  /* ===== 基础层（2.1，不算在五色内，全程固定） ===== */
+  --color-paper:#f5efe3;      /* 纸底 */
+  --color-ink:#3b362f;        /* 墨色 */
+  --color-muted:#8a8578;      /* 辅助灰 */
+
+  /* ===== 五色系主档（2.1：色值可调，色系不可加） ===== */
+  --color-moss:#7d8c6f;       /* 苔绿 */
+  --color-ochre:#c9a227;      /* 赭石 */
+  --color-cinnabar:#b0483a;   /* 朱砂 */
+  --color-indigo:#9fb3c0;     /* 黛蓝 */
+  --color-apricot:#d98e5f;    /* 杏橘（代表阳光） */
+
+  /* ===== 五色扩展档（2.1 可扩展列；赭石、黛蓝无扩展） ===== */
+  --color-moss-light:#9aa88c;
+  --color-moss-dark:#5f6e54;
+  --color-cinnabar-light:#d98878;
+  --color-cinnabar-dark:#8f3a2e;
+  --color-sel-bg:#e8d7cb;     /* S3-06 选中态底（载录分类圆）；来源 mock --sel-fill，DESIGN_SPEC 2.1 待回写（PENDING #7） */
+  --color-apricot-light:#f0c99a;
+  --color-apricot-dark:#b9713d;
+
+  /* ===== 六分类色（2.1.1，分类固有属性，所有页面统一） ===== */
+  --color-cat-food:#c9a227;       /* 餐饮=赭石 */
+  --color-cat-transport:#9fb3c0;  /* 交通=黛蓝 */
+  --color-cat-driving:#d98e5f;    /* 自驾=杏橘 */
+  --color-cat-hotel:#7d8c6f;      /* 住宿=苔绿 */
+  --color-cat-ticket:#b0483a;     /* 门票=朱砂 */
+  --color-cat-other:#8a8578;      /* 其他=辅助灰 */
+
+  /* ===== 字体三层（2.2） ===== */
+  --font-display:"FosiTi",serif;   /* 大字主文案：主题、页面名、底部 tab */
+  --font-accent:"SiyinSong",serif; /* 点睛：小文案、按钮、金额、列表条目 */
+  --font-system:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; /* 辅助：注释、提示、功能标题 */
+
+  /* ===== 字号（9 / 9.1：Keynote pt ×0.3611 落地值） ===== */
+  --fs-xl:36px;       /* 三 tab */
+  --fs-lg:32px;       /* 首页主标题 */
+  --fs-md:28px;       /* 载录页标题 */
+  --fs-body:18px;     /* 副标题/卷号 */
+  --fs-base:16px;     /* 按钮文字（首页主按钮） */
+  --fs-caption:14px;  /* placeholder */
+  --fs-note:12px;     /* 底部灰字/汇总小字 */
+}

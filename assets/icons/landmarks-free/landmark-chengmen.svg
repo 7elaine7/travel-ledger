@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <filter id="handShake" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="2.5"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="#3b362f" stroke-linecap="round" stroke-linejoin="round" filter="url(#handShake)">
+    <path d="M35 42 Q75 20 115 38" stroke-width="2.5" stroke-dasharray="60 3 14 4"/>
+    <path d="M45 56 Q75 44 105 52" stroke-width="2.2"/>
+    <path d="M62 30 L88 27" stroke-width="1.8"/>
+    <path d="M55 47 L55 52" stroke-width="1.6"/>
+    <path d="M75 43 L75 48" stroke-width="1.6"/>
+    <path d="M95 46 L95 50" stroke-width="1.6"/>
+    <path d="M48 51 L48 55" stroke-width="1.6"/>
+    <path d="M40 59 L110 56" stroke-width="2.2"/>
+    <path d="M50 58 L48 120" stroke-width="2.4"/>
+    <path d="M100 57 L102 120" stroke-width="2.4"/>
+    <path d="M52 72 L98 70" stroke-width="2"/>
+    <path d="M62 120 L62 92 Q75 80 88 90 L88 120" stroke-width="2.4"/>
+    <path d="M14 108 Q24 96 34 106" stroke-width="1.8"/>
+    <path d="M116 104 Q126 94 136 104" stroke-width="1.8"/>
+    <path d="M40 120 L110 119" stroke-width="2.4"/>
+  </g>
+</svg>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>旅行记账</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- S3-04：token + 新视觉组件层（tab 栏/占位卡引用）。app-v2 的 box-sizing 已收窄到
+       .v2-phone 子树，对 styles.css 旧布局零影响；置于其后加载，新类名与之无冲突 -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app-v2.css">
+  <!-- S2-04 PWA：硬约束 5 + 5.2-F12 完全离线可用 -->
+  <link rel="manifest" href="manifest.json">
+  <!-- iOS 主屏图标：iOS 不读 manifest icons，必须单独声明 180×180 PNG -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+  <!-- iOS standalone 双保险：display: standalone 在 iOS 15 是否被识别未核实，
+       加 legacy meta，无害（S2-04 交付报告不确定项已记） -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+  <main class="app">
+
+    <!-- S3-05：共享 SVG filter（与 mock 同源）；#handdrawn 弱抖 / #handdrawn-strong 强抖，
+         载录/账簿等页迁移时直接引用，不再重复定义。
+         S3-07 补 #handShake（参数同 mock/ledger-preview.html，清按钮虚线框用）；
+         mock 的 #handShakeVert（竖虚线专用）不搬——S3-07 竖虚线改 CSS border 画（人拍板） -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <filter id="handdrawn" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb"/>
+          <feDisplacementMap in="SourceGraphic" in2="turb" scale="1.5"/>
+        </filter>
+        <filter id="handdrawn-strong" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb2"/>
+          <feDisplacementMap in="SourceGraphic" in2="turb2" scale="3"/>
+        </filter>
+        <filter id="handShake" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb3"/>
+          <feDisplacementMap in="SourceGraphic" in2="turb3" scale="1.5"/>
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- S3-05 首页：absolute 坐标模式（DESIGN_SPEC 3.2；坐标与 mock/home-preview.html 一致，
+         .size-tag 诊断标注不搬）。旧首页六类内容已删：汇总卡/筛选卡/区间条/流水列表/
+         数据管理卡/空态插画（S3-07 搬账簿页与查页，git 5b62ae2 可取） -->
+    <section id="view-home" class="view" data-view="home" hidden>
+      <div class="v2-page">
+
+        <!-- 顶部标题区 -->
+        <div class="v2-title-block">
+          <h1 class="v2-title" style="top:156px; letter-spacing:2px;">一笔载岁&nbsp;静记流年</h1>
+          <div class="v2-subtitle" style="top:213px; letter-spacing:2px;">贰零贰陆·壹十月·卷一</div>
+        </div>
+
+        <!-- 输入框：SVG 手绘框 + 话筒简笔（纯装饰，S1-03 语音未排期）+ 真实输入框
+             （id 沿用 entry-input：S3-06 载录页读值；切视图是 display:none，DOM 不销毁，内容保留） -->
+        <div class="v2-input-box" style="left:48px; top:275px; width:293px; height:78px;">
+          <svg class="input-svg" viewBox="0 0 293 78">
+            <rect x="1.5" y="1.5" width="290" height="75" rx="6" ry="6"
+                  class="stroke-cinnabar" fill="none" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="220 3 14 4 60 3"
+                  filter="url(#handdrawn)"/>
+          </svg>
+          <input id="entry-input" class="v2-input-real" type="text"
+                 placeholder="打字或点击话筒输入……" autocomplete="off" enterkeyhint="done">
+          <svg class="mic-icon" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="11" y="4" width="10" height="14" rx="5" ry="5"
+                  class="stroke-cinnabar" fill="none" stroke-width="2"
+                  stroke-linecap="round"
+                  filter="url(#handdrawn)"/>
+            <path d="M 7 16 Q 7 24 16 24 Q 25 24 25 16"
+                  class="stroke-cinnabar" fill="none" stroke-width="2"
+                  stroke-linecap="round" stroke-dasharray="14 2 4 2"
+                  filter="url(#handdrawn)"/>
+            <path d="M 16 24 L 16 28"
+                  class="stroke-cinnabar" fill="none" stroke-width="2"
+                  stroke-linecap="round"
+                  filter="url(#handdrawn)"/>
+            <path d="M 11 28 L 21 28"
+                  class="stroke-cinnabar" fill="none" stroke-width="2"
+                  stroke-linecap="round" stroke-dasharray="4 2 2 2"
+                  filter="url(#handdrawn)"/>
+          </svg>
+        </div>
+
+        <!-- 提交按钮（SVG 手绘底）：S3-05 接线 = 进载录占位页（S3-06 迁移表单） -->
+        <div class="v2-btn-primary" style="left:72px; top:390px; width:246px; height:65px;">
+          <svg class="btn-bg" viewBox="0 0 246 65" preserveAspectRatio="none">
+            <rect x="3" y="3" width="240" height="59" rx="6"
+                  class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                  filter="url(#handdrawn-strong)"/>
+          </svg>
+          <button id="btn-record" type="button" class="v2-btn-text">谨存此笔</button>
+        </div>
+
+        <!-- 底部灰字 -->
+        <div class="v2-footer-note" style="top:580px; letter-spacing:1px;">日子翻过去，手账留下来。</div>
+
+        <!-- 底部装饰：毛笔带尾线 + 波浪线（墨色，#handdrawn） -->
+        <div class="v2-deco-wrap" style="left:45px; top:472px; width:300px; height:64px;" aria-hidden="true">
+          <svg class="deco-svg" viewBox="0 0 300 64">
+            <path d="M4 52 Q 30 40 56 52 T 108 52 T 160 52 T 184 52"
+                  class="stroke-ink" fill="none" stroke-width="2"
+                  stroke-linecap="round" stroke-opacity="0.35"
+                  filter="url(#handdrawn)"/>
+            <path d="M 214 46 Q 202 51 190 49"
+                  class="stroke-ink" fill="none" stroke-width="2"
+                  stroke-linecap="round" stroke-opacity="0.55"
+                  stroke-dasharray="7 3 4 3"
+                  filter="url(#handdrawn)"/>
+            <g fill="none" class="stroke-ink" stroke-width="2"
+               stroke-opacity="0.55" stroke-linecap="round"
+               stroke-linejoin="round" filter="url(#handdrawn)">
+              <path d="M 214 46 Q 220 28 246 21 L 250 26 Q 236 42 214 46 Z"/>
+              <path d="M 246 21 L 292 -3"/>
+              <path d="M 250 26 L 296 2"/>
+              <path d="M 292 -3 L 296 2"/>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- S3-07 账簿页（DESIGN_SPEC 3.4；absolute 坐标模式，坐标同 mock/ledger-preview.html，
+         size-tag 诊断标注不搬）。一行 = 一天（日聚合，Ledger.groupByDate 喂数据）；⋯/≡ 本轮不渲染
+         （≡ 随 S3-08 明细页、⋯ 随 S3-09 编辑删除加回）。空态初始 hidden，清空/无数据时由 JS 切换
+         （原地切换不跳页，人拍板）；空态查/清按钮置灰 = 决策 3：纯视觉变灰、仍可点（Q3 toast 拦截） -->
+    <section id="view-ledger" class="view" data-view="ledger" hidden>
+      <div class="v2-page">
+
+        <!-- 顶部：印章 + 页题 + 对仗 + 卷号（坐标同列表态 mock，与载录页同制式） -->
+        <img class="v2-record-seal" src="assets/seals/seal-zhang.png" alt="账" style="left:31px; top:33px;">
+        <h1 class="v2-record-title" style="left:88px; top:40px; letter-spacing:2px;">账簿</h1>
+        <p class="v2-record-couplet" style="right:39px; top:39px;"><span style="font-size:17px;">往</span><span style="font-size:21px;">事</span><span style="font-size:16px;">可</span><span style="font-size:19px;">稽</span>&nbsp;<span style="font-size:21px;">来</span><span style="font-size:17px;">路</span><span style="font-size:16px;">有</span><span style="font-size:19px;">迹</span></p>
+        <p class="v2-juan" style="right:38px; top:65px;">贰零贰陆·壹十月·卷一</p>
+
+        <!-- 查 / 清 按钮（114×47，top:127；列表态 = 查实清虚。查本轮无行为，S3-08 接线） -->
+        <div class="v2-ledger-btn v2-ledger-btn--cha" id="ledger-btn-cha" style="left:47px;">
+          <svg class="btn-bg" viewBox="0 0 114 47" preserveAspectRatio="none">
+            <rect x="3" y="3" width="108" height="41" rx="6"
+                  class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                  filter="url(#handdrawn-strong)"/>
+          </svg>
+          <button id="btn-ledger-search" type="button" class="v2-btn-text">查</button>
+        </div>
+        <div class="v2-ledger-btn v2-ledger-btn--qing" id="ledger-btn-qing" style="left:220px;">
+          <svg class="btn-bg" viewBox="0 0 114 47" preserveAspectRatio="none">
+            <rect x="2" y="2" width="110" height="43" rx="6"
+                  class="stroke-cinnabar" fill="none" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="90 4 26 3 58 4 42 3"
+                  filter="url(#handShake)"/>
+          </svg>
+          <button id="btn-ledger-clear" type="button" class="v2-btn-text">清</button>
+        </div>
+
+        <!-- 列表滚动区：按钮区下(174) → 合计条上(693-151=542 同 mock)；数据行由 JS 注入
+             #ledger-list，竖虚线画在 .v2-ledger-timeline::before（CSS border，高度随行数） -->
+        <div class="v2-ledger-list" id="ledger-list-area">
+          <div class="v2-ledger-timeline" id="ledger-list"></div>
+        </div>
+
+        <!-- 空态（初始 hidden；大字/灰字/重启坐标同 mock/ledger-empty-preview.html；
+             空态下查/清按钮仍显示在原位——置灰由 JS 加 is-muted 类，见 app.js renderLedgerList） -->
+        <div id="ledger-empty" class="v2-ledger-empty" hidden>
+          <p class="v2-ledger-empty-line">辞却前尘&nbsp;重启征程</p>
+          <div class="v2-ledger-empty-sub">账户为空&nbsp;快来记一笔吧</div>
+          <div class="v2-ledger-restart">
+            <svg class="btn-bg" viewBox="0 0 319 46" preserveAspectRatio="none">
+              <rect x="3" y="3" width="313" height="40" rx="6"
+                    class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                    filter="url(#handdrawn-strong)"/>
+            </svg>
+            <button id="btn-ledger-restart" type="button" class="v2-btn-text">重启</button>
+          </div>
+        </div>
+
+        <!-- 合计条（left:23 right:23 bottom:108 = mock top:542 的底锚定写法，参考高 693 下视觉相同） -->
+        <div class="v2-ledger-total" id="ledger-total">
+          <div class="v2-ledger-total-label">合计</div>
+          <div class="v2-ledger-total-num" id="ledger-total-num">¥ 0</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="view-youjian" class="view" data-view="youjian" hidden>
+      <div class="card placeholder-card">
+        <p class="placeholder-card__title">游笺</p>
+        <p class="placeholder-card__note">占位空壳 · 内容留后续 Sprint</p>
+      </div>
+    </section>
+
+    <!-- S3-06 载录页（DESIGN_SPEC 3.3 模态页，无 tab）：absolute 坐标模式，坐标同
+         mock/record-preview.html（size-tag 诊断标注不搬，PENDING #2）。金额/分类为静态展示
+         （128.00 / 预选餐饮），解析预填随保存逻辑接线（PENDING #16）；缮录归帙本轮无保存行为，
+         点击暂回首页，去向 S3-07 后改账簿（PENDING #15）。← 带内容弹确认框留弹窗系统（B-60） -->
+    <section id="view-record" class="view" data-view="record" hidden>
+      <div class="v2-page v2-page--full">
+
+        <!-- 顶部：印章 + 页题 + 对仗 + 卷号 -->
+        <img class="v2-record-seal" src="assets/seals/seal-ji.png" alt="记" style="left:31px; top:33px;">
+        <h1 class="v2-record-title" style="left:88px; top:40px; letter-spacing:2px;">载录</h1>
+        <p class="v2-record-couplet" style="right:39px; top:39px;"><span style="font-size:17px;">初</span><span style="font-size:21px;">启</span><span style="font-size:16px;">其</span><span style="font-size:19px;">端</span>&nbsp;<span style="font-size:21px;">落</span><span style="font-size:17px;">笔</span><span style="font-size:16px;">由</span><span style="font-size:19px;">你</span></p>
+        <p class="v2-juan" style="right:38px; top:65px;">贰零贰陆·壹十月·卷一</p>
+
+        <!-- ← 返回入口：手绘朱砂箭头（容器 44×32 热区，视觉右缘 35px 与卷号右缘对齐） -->
+        <button id="btn-record-back" type="button" class="v2-record-back" style="right:31px; top:116px;" aria-label="返回首页">
+          <svg viewBox="0 0 44 32" aria-hidden="true">
+            <path d="M 40 17 Q 22 15 7 17" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" filter="url(#handdrawn)"/>
+            <path d="M 14 10 Q 9 14 6 17 Q 9 20 14 23" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+            <path d="M 40 17 Q 41 12 38 8" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" filter="url(#handdrawn)"/>
+          </svg>
+        </button>
+
+        <!-- 金额：label 13px + 36px 静态值 + 手绘下划线 -->
+        <div class="v2-field-label" style="left:36px; top:126px;">金额</div>
+        <div class="v2-amount-row" style="left:35px; top:158px;"><span>¥</span><span class="v2-amount-num">128.00</span></div>
+        <svg class="line-svg" style="left:32px; top:199px; width:326px; height:8px;" viewBox="0 0 326 8" aria-hidden="true">
+          <path d="M1 5 Q 82 4 163 5 T 325 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="200 4 12 3 60 4 40 3" filter="url(#handdrawn)"/>
+        </svg>
+
+        <!-- 分类：6 项两行三列（静态预选餐饮）。图标 img 与圆框 svg 平级——mock 把 img 写进
+             <svg> 会被 HTML 解析器挪成兄弟节点，实装显式平级、行为确定 -->
+        <div class="v2-field-label" style="left:38px; top:229px;">分类</div>
+        <div class="v2-cat-item is-sel" style="left:73px; top:267px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="fill-sel-bg stroke-cinnabar" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-food.png" alt="餐饮">
+          <div class="v2-cat-name">餐饮</div>
+        </div>
+        <div class="v2-cat-item" style="left:168px; top:267px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="stroke-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-transport.png" alt="交通">
+          <div class="v2-cat-name">交通</div>
+        </div>
+        <div class="v2-cat-item" style="left:263px; top:267px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="stroke-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-driving.png" alt="自驾">
+          <div class="v2-cat-name">自驾</div>
+        </div>
+        <div class="v2-cat-item" style="left:73px; top:357px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="stroke-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-hotel.png" alt="住宿">
+          <div class="v2-cat-name">住宿</div>
+        </div>
+        <div class="v2-cat-item" style="left:168px; top:357px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="stroke-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-ticket.png" alt="门票">
+          <div class="v2-cat-name">门票</div>
+        </div>
+        <div class="v2-cat-item" style="left:263px; top:357px;">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="27" class="stroke-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+          </svg>
+          <img class="v2-cat-icon" src="assets/icons/category/category-other.png" alt="其他">
+          <div class="v2-cat-name">其他</div>
+        </div>
+
+        <!-- 时间 / 地点 -->
+        <div class="v2-field-label" style="left:35px; top:469px;">时间</div>
+        <div class="v2-field-label" style="left:206px; top:469px;">地点</div>
+        <svg class="line-svg" style="left:87px; top:476px; width:100px; height:8px;" viewBox="0 0 100 8" aria-hidden="true">
+          <path d="M1 5 Q 26 4 50 5 T 99 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="70 3 20 3" filter="url(#handdrawn)"/>
+        </svg>
+        <svg class="line-svg" style="left:248px; top:476px; width:100px; height:8px;" viewBox="0 0 100 8" aria-hidden="true">
+          <path d="M1 5 Q 26 4 50 5 T 99 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="70 3 20 3" filter="url(#handdrawn)"/>
+        </svg>
+
+        <!-- 备注 -->
+        <div class="v2-field-label" style="left:35px; top:533px;">备注</div>
+        <svg class="line-svg" style="left:85px; top:544px; width:267px; height:8px;" viewBox="0 0 267 8" aria-hidden="true">
+          <path d="M1 5 Q 67 4 134 5 T 266 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="160 4 10 3 80" filter="url(#handdrawn)"/>
+        </svg>
+
+        <!-- 缮录归帙：46→64px（主按钮拍板档，同首页），top 586→568 保底缘 632 不变；
+             文字 18px（9.1 按钮文案档）+ 字距 4px -->
+        <div class="v2-btn-primary" style="left:35px; top:568px; width:319px; height:64px;">
+          <svg class="btn-bg" viewBox="0 0 319 64" preserveAspectRatio="none">
+            <rect x="3" y="3" width="313" height="58" rx="6"
+                  class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                  filter="url(#handdrawn-strong)"/>
+          </svg>
+          <button id="btn-record-save" type="button" class="v2-btn-text" style="font-size:var(--fs-body); letter-spacing:4px;">缮录归帙</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- S3-08 阅踪页（统一明细页，DESIGN_SPEC 3.5/3.9；模态页无 tab，.v2-page--full 同载录）。
+         无 mock（Sprint 3「查页（无 mock）」），坐标按载录/账簿页制式推定（2026-09-20 人拍板）。
+         筛选：原生 date 不加 max（未来日=查空无害；B-23 Safari 怪癖已知，真机验收盯）+
+         text/datalist 精确匹配；[寻踪] 显式触发，进页不自动查询；引导空态与查询无结果共用一处。
+         [存卷] 留批 2（db v5 + 命名 sheet）、[归档] 留批 3（导出链），本轮渲染不接线 -->
+    <section id="view-trace" class="view" data-view="trace" hidden>
+      <div class="v2-page v2-page--full">
+
+        <!-- 顶部：印章 + 页题 + 对仗 + 卷号（制式同账簿/载录页；对仗字号照 5.1 错落序列） -->
+        <img class="v2-record-seal" src="assets/seals/seal-zong.png" alt="踪" style="left:31px; top:33px;">
+        <h1 class="v2-record-title" style="left:88px; top:40px; letter-spacing:2px;">阅踪</h1>
+        <p class="v2-record-couplet" style="right:39px; top:39px;"><span style="font-size:17px;">罗</span><span style="font-size:21px;">陈</span><span style="font-size:16px;">途</span><span style="font-size:19px;">记</span>&nbsp;<span style="font-size:21px;">遍</span><span style="font-size:17px;">览</span><span style="font-size:16px;">游</span><span style="font-size:19px;">踪</span></p>
+        <p class="v2-juan" style="right:38px; top:65px;">贰零贰陆·壹十月·卷一</p>
+
+        <!-- ← 返回入口：热区与箭头 SVG 同载录页（right:31 top:116），去向由 openTrace 记录 -->
+        <button id="btn-trace-back" type="button" class="v2-record-back" style="right:31px; top:116px;" aria-label="返回">
+          <svg viewBox="0 0 44 32" aria-hidden="true">
+            <path d="M 40 17 Q 22 15 7 17" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" filter="url(#handdrawn)"/>
+            <path d="M 14 10 Q 9 14 6 17 Q 9 20 14 23" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#handdrawn)"/>
+            <path d="M 40 17 Q 41 12 38 8" class="stroke-cinnabar" fill="none" stroke-width="2" stroke-linecap="round" filter="url(#handdrawn)"/>
+          </svg>
+        </button>
+
+        <!-- 筛选条（2026-09-20 上移压缩：label 120 / input 142 / 线 166，地点行 190/212/236；
+             线距 input 字形底 ≈2.5px，见 css .v2-trace-input 注释；datalist 建议由 JS 填） -->
+        <div class="v2-field-label" style="left:35px; top:120px;">起始日期</div>
+        <input id="trace-from" class="v2-trace-input" type="date" style="left:35px; top:142px; width:140px;" aria-label="起始日期">
+        <svg class="line-svg" style="left:35px; top:166px; width:140px; height:8px;" viewBox="0 0 140 8" aria-hidden="true">
+          <path d="M1 5 Q 36 4 70 5 T 139 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="100 3 14 3" filter="url(#handdrawn)"/>
+        </svg>
+        <div class="v2-field-label" style="left:215px; top:120px;">结束日期</div>
+        <input id="trace-to" class="v2-trace-input" type="date" style="left:215px; top:142px; width:140px;" aria-label="结束日期">
+        <svg class="line-svg" style="left:215px; top:166px; width:140px; height:8px;" viewBox="0 0 140 8" aria-hidden="true">
+          <path d="M1 5 Q 36 4 70 5 T 139 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="100 3 14 3" filter="url(#handdrawn)"/>
+        </svg>
+        <div class="v2-field-label" style="left:35px; top:190px;">地点</div>
+        <input id="trace-location" class="v2-trace-input" type="text" list="trace-loc-list" style="left:35px; top:212px; width:225px;" autocomplete="off" aria-label="地点">
+        <svg class="line-svg" style="left:35px; top:236px; width:225px; height:8px;" viewBox="0 0 225 8" aria-hidden="true">
+          <path d="M1 5 Q 58 4 112 5 T 224 5" class="stroke-muted" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="160 4 10 3" filter="url(#handdrawn)"/>
+        </svg>
+        <datalist id="trace-loc-list"></datalist>
+
+        <!-- [寻踪]：显式触发（实底朱砂，同账簿[查]族；80×40 缩档，尺寸内联） -->
+        <div class="v2-trace-btn v2-trace-btn--shi" style="left:275px; top:205px; width:80px; height:40px;">
+          <svg class="btn-bg" viewBox="0 0 80 40" preserveAspectRatio="none">
+            <rect x="3" y="3" width="74" height="34" rx="6"
+                  class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                  filter="url(#handdrawn-strong)"/>
+          </svg>
+          <button id="btn-trace-search" type="button" class="v2-btn-text">寻踪</button>
+        </div>
+
+        <!-- 操作行：归档（实）/ 存卷（虚，置灰 is-muted 批 2 接）。两端与日期行输入框对齐
+             （左 35 ~ 右 355），各宽 149、间距 22；viewBox 同步 149 防手绘线拉伸变形 -->
+        <div class="v2-trace-btn v2-trace-btn--shi" style="left:35px; top:258px; width:149px; height:47px;">
+          <svg class="btn-bg" viewBox="0 0 149 47" preserveAspectRatio="none">
+            <rect x="3" y="3" width="143" height="41" rx="6"
+                  class="fill-cinnabar stroke-cinnabar" stroke-width="2"
+                  filter="url(#handdrawn-strong)"/>
+          </svg>
+          <button id="btn-trace-export" type="button" class="v2-btn-text">归档</button>
+        </div>
+        <div class="v2-trace-btn v2-trace-btn--xu" id="trace-btn-cunjuan" style="left:206px; top:258px; width:149px; height:47px;">
+          <svg class="btn-bg" viewBox="0 0 149 47" preserveAspectRatio="none">
+            <rect x="2" y="2" width="145" height="43" rx="6"
+                  class="stroke-cinnabar" fill="none" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="110 4 36 3 68 4 42 3"
+                  filter="url(#handShake)"/>
+          </svg>
+          <button id="btn-trace-save" type="button" class="v2-btn-text">存卷</button>
+        </div>
+
+        <!-- 列表滚动区：操作行下(310) → 合计条顶缘(bottom:43)；数据行由 JS 注入 #trace-list，
+             竖虚线画在 .v2-trace-timeline::before（同账簿 CSS border 配方，高度随行数） -->
+        <div class="v2-trace-list" id="trace-list-area">
+          <div class="v2-trace-timeline" id="trace-list"></div>
+        </div>
+
+        <!-- 空态（引导空态与查询无结果共用一处，人拍板；初始 hidden，openTrace/空结果时由 JS 显） -->
+        <div id="trace-empty" hidden>
+          <p class="v2-trace-empty-line">此间无踪</p>
+          <div class="v2-trace-empty-sub">择定时日，再寻踪迹</div>
+        </div>
+
+        <!-- 合计条：复用账簿合计条配方（.v2-ledger-total，仅换 id），合计 = 当前筛选结果 -->
+        <div class="v2-ledger-total" id="trace-total" hidden>
+          <div class="v2-ledger-total-label">合计</div>
+          <div class="v2-ledger-total-num" id="trace-total-num">¥ 0</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- S1-02 写入前确认弹窗（.sheet，文本/语音共用组件，接收 rawText/amount/category/happenedAt） -->
+    <div id="sheet-mask" class="sheet-mask" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <h2 id="sheet-title" class="sheet__title">确认这笔账</h2>
+
+        <label class="sheet__label" for="sheet-rawtext">📝 原文</label>
+        <input id="sheet-rawtext" class="input sheet__field" type="text">
+
+        <label class="sheet__label" for="sheet-amount">💰 金额（元）</label>
+        <input id="sheet-amount" class="input sheet__field" type="number" step="0.01" min="0" inputmode="decimal">
+
+        <span class="sheet__label">🏷️ 类别</span>
+        <div id="sheet-categories" class="sheet__chips"></div>
+
+        <span class="sheet__label">📅 日期</span>
+        <div class="sheet__date-row">
+          <button type="button" class="date-shortcut" data-offset="0">今天</button>
+          <button type="button" class="date-shortcut" data-offset="-1">昨天</button>
+          <button type="button" class="date-shortcut" data-offset="-2">前天</button>
+          <input id="sheet-date" class="input sheet__date-input" type="date">
+        </div>
+        <p class="sheet__hint">只能选今天及之前</p>
+
+        <p id="sheet-error" class="sheet__error"></p>
+
+        <div class="btn-row">
+          <button id="sheet-cancel" type="button" class="btn btn--danger">取消</button>
+          <button id="sheet-confirm" type="button" class="btn btn--primary">确认保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3-07 清空两步确认（结构复活自 git 5b62ae2，DOM/文案/样式照旧——决策 5：沿用旧 .sheet
+         结构与 styles.css 现有配方，视觉暂不动，B-60 弹窗系统统一时一起换皮；
+         .clear-mask/.confirm-sheet__*/.action-btn 均为 styles.css 健在类）。
+         第一步警告 → 第二步最终确认；任一步取消 / 点遮罩 = 全关（无状态栈） -->
+    <div id="clear-warn-mask" class="sheet-mask clear-mask" hidden>
+      <div class="sheet" role="alertdialog" aria-label="清空警告">
+        <p class="confirm-sheet__text">清空这个账户的全部账单？</p>
+        <p id="clear-warn-text" class="confirm-sheet__warn"></p>
+        <button id="btn-clear-warn-cancel" type="button" class="action-btn action-btn--muted">取消</button>
+        <button id="btn-clear-next" type="button" class="action-btn action-btn--danger">下一步</button>
+      </div>
+    </div>
+    <div id="clear-confirm-mask" class="sheet-mask clear-mask" hidden>
+      <div class="sheet" role="alertdialog" aria-label="最终确认清空">
+        <p class="confirm-sheet__text">最后确认：清空后无法恢复！</p>
+        <p id="clear-confirm-text" class="confirm-sheet__warn"></p>
+        <button id="btn-clear-cancel" type="button" class="action-btn action-btn--muted">取消</button>
+        <button id="btn-clear-confirm" type="button" class="action-btn action-btn--danger">🗑️ 确认清空</button>
+      </div>
+    </div>
+
+    <!-- 保存成功提示 toast -->
+    <div id="toast" class="toast" hidden>✅ 保存成功</div>
+
+    <!-- 启动失败（如数据库被占用/版本异常）：最小错误视图，复用 .card 与 .btn -->
+    <section id="view-error" class="view" data-view="error" hidden>
+      <div class="card error-card">
+        <h1 class="onboard-title">账本打不开了</h1>
+        <p id="error-message" class="error-message"></p>
+        <button id="btn-reload" type="button" class="btn btn--primary">刷新</button>
+      </div>
+    </section>
+
+    <!-- S3-04 底部 tab 栏（AC3/AC4/AC5）：账=账簿 / 记=首页 / 户=游笺，记默认高亮。
+         载录是模态页无 tab（DESIGN_SPEC 3.3）；error 态由 showView 隐藏本栏 -->
+    <nav id="tabbar" class="tabbar" aria-label="主导航">
+      <button id="tab-ledger" type="button" class="tabbar__btn" data-tab="ledger">账</button>
+      <button id="tab-home" type="button" class="tabbar__btn is-active" data-tab="home" aria-current="page">记</button>
+      <button id="tab-youjian" type="button" class="tabbar__btn" data-tab="youjian">户</button>
+    </nav>
+
+  </main>
+
+  <!-- 与 sw.js APP_SHELL_URLS 列表保持同步（sw.js 顶部注释已写明） -->
+  <script src="js/db.js"></script>
+  <script src="js/profiles.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/entry-utils.js"></script>
+  <script src="js/ledger.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  <!-- S2-04 SW 注册：file:// 下抛 SecurityError 被 catch 吞掉，不阻塞应用启动 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function (err) {
+          console.warn('SW 注册失败（file:// 下属正常）', err);
+        });
+      });
+    } else {
+      // 非安全上下文（file:// 或局域网 HTTP，如 iPhone 访问 http://192.168.x.x:8000）
+      console.info('SW 不可用：非安全上下文（需 https 或 localhost）');
+    }
+  </script>
+</body>
+</html>

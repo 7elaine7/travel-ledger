@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="150" height="150">
+  <g transform="translate(-460.1 -218.6) scale(0.62)" fill="none" stroke="#3b362f" stroke-linecap="round">
+    <path d="M 750,522 Q 782,456 812,500 Q 822,512 838,520" stroke-width="2.2"/>
+    <path d="M 866,522 Q 912,452 960,522" stroke-width="2.2"/>
+    <path d="M 898,481 v -9 m 0,0 l -4,-4 m 4,4 l 4,-4" stroke-width="1.65"/>
+    <path d="M 914,470 v -9 m 0,0 l -4,-4 m 4,4 l 4,-4" stroke-width="1.65"/>
+    <path d="M 930,479 v -8 m 0,0 l -4,-4 m 4,4 l 4,-4" stroke-width="1.65"/>
+    <path d="M 906,492 v -7 m 0,0 l -3,-4 m 3,4 l 3,-4" stroke-width="1.54"/>
+    <path d="M 790,452 V 518 M 914,452 V 518" stroke-width="2.86"/>
+    <path d="M 783,516 H 801 M 783,516 V 523 M 801,516 V 523 M 783,523 H 801" stroke-width="1.98"/>
+    <path d="M 903,516 H 921 M 903,516 V 523 M 921,516 V 523 M 903,523 H 921" stroke-width="1.98"/>
+    <path d="M 778,452 H 926 M 778,444 H 926 M 778,444 V 452 M 926,444 V 452" stroke-width="2.2"/>
+    <path d="M 786,436 H 918 M 786,430 H 918" stroke-width="1.98"/>
+    <path d="M 800,430 V 425 M 820,430 V 424 M 852,430 V 423 M 884,430 V 424 M 904,430 V 425" stroke-width="1.98"/>
+    <path d="M 758,417 Q 852,428 946,417" stroke-width="2.64"/>
+    <path d="M 758,417 q -8,-2 -12,-9" stroke-width="2.2"/>
+    <path d="M 946,417 q 8,-2 12,-9" stroke-width="2.2"/>
+    <path d="M 782,404 Q 852,413 922,404" stroke-width="2.42"/>
+    <path d="M 782,404 q -4,-6 2,-9" stroke-width="1.98"/>
+    <path d="M 922,404 q 4,-6 -2,-9" stroke-width="1.98"/>
+    <path d="M 846,405 V 399 H 858 V 405" stroke-width="1.98"/>
+    <g stroke-width="1.98">
+      <path d="M 772,532 q 22,3 44,0"/>
+      <path d="M 838,542 q 26,3 52,0"/>
+      <path d="M 900,530 q 20,3 40,0"/>
+      <path d="M 810,548 q 18,3 36,0"/>
+      <path d="M 880,548 q 16,3 32,0"/>
+      <path d="M 944,538 q 16,3 32,0"/>
+    </g>
+  </g>
+</svg>

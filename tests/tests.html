@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>单元测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #2F2B26;
+      background: #FAF6EC;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { font-size: 20px; margin: 0 0 16px; }
+    .app { max-width: 640px; margin: 0 auto; }
+    .summary {
+      font-size: 20px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border: 2px solid #2F2B26;
+      border-radius: 12px;
+      background: #FFFDF8;
+    }
+    .summary.pass { background: #E8F5E9; }
+    .summary.fail { background: #FDEDEA; }
+    .case-list { list-style: none; margin: 16px 0 0; padding: 0; }
+    .case {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border: 2px solid #2F2B26;
+      border-radius: 10px;
+      background: #FFFDF8;
+    }
+    .case.pass { border-left-width: 8px; border-left-color: #4CAF50; }
+    .case.fail { border-left-width: 8px; border-left-color: #E0493C; }
+    .error {
+      margin-top: 6px;
+      padding: 6px 8px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 14px;
+      background: #FDEDEA;
+      border-radius: 6px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>travel-ledger 单元测试（零依赖，打开即跑）</h1>
+    <div id="results"><p>运行中…</p></div>
+  </div>
+
+  <!-- 加载失败哨兵（2026-09-12）：先于所有被测脚本注册 window.onerror。
+       任何脚本语法/运行错误、script 资源加载失败都会渲染进页面的红条区，
+       防止"某脚本炸掉 → 用例静默消失、总数看似正常"（S1-01 Safari 事故形态）。
+       错误盒子插在 #results 之前（兄弟节点），不会被 T.run() 的 innerHTML 重写冲掉；
+       onerror 返回 false 不拦截，控制台仍有默认红色报错（6.5-B 排查顺序）。 -->
+  <script>
+  (function () {
+    'use strict';
+    var errors = [];
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function render() {
+      if (!errors.length) { return; }
+      var root = document.getElementById('results');
+      if (!root) { return; } /* DOM 未就绪：先记下，DOMContentLoaded 后补渲染 */
+      var box = document.getElementById('load-errors');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'load-errors';
+        root.parentNode.insertBefore(box, root);
+      }
+      var html = '<p class="summary fail">❌ 捕获到脚本错误 ' + errors.length
+        + ' 条——出错脚本的用例不会执行，下方通过总数会偏小</p><ul class="case-list">';
+      for (var i = 0; i < errors.length; i++) {
+        html += '<li class="case fail"><div class="error">'
+          + esc(errors[i].message) + '<br>'
+          + esc(errors[i].source) + ':' + errors[i].lineno + ':' + errors[i].colno
+          + '</div></li>';
+      }
+      html += '</ul>';
+      box.innerHTML = html;
+    }
+
+    window.onerror = function (message, source, lineno, colno) {
+      errors.push({ message: message, source: source, lineno: lineno, colno: colno });
+      render();
+      return false;
+    };
+
+    /* script/link 文件缺失不触发 window.onerror，用捕获阶段监听兜住 */
+    window.addEventListener('error', function (e) {
+      var t = e && e.target;
+      if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+        errors.push({
+          message: '资源加载失败：' + (t.src || t.href || '(未知)'),
+          source: '(资源加载)', lineno: '-', colno: '-'
+        });
+        render();
+      }
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', render);
+  })();
+  </script>
+
+  <!-- 被测源码（普通 script，file:// 可开） -->
+  <script src="../js/profiles.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/parser.js"></script>
+  <script src="../js/entry-utils.js"></script>
+  <script src="../js/ledger.js"></script>
+  <script src="../js/export.js"></script>
+
+  <!-- 测试助手与用例 -->
+  <script src="assert.js"></script>
+  <script src="unit-validation.js"></script>
+  <script src="unit-db.js"></script>
+  <script src="unit-parser.js"></script>
+  <script src="unit-entry-utils.js"></script>
+  <script src="unit-ledger.js"></script>
+  <script src="unit-export.js"></script>
+
+  <script>
+    T.run();
+  </script>
+</body>
+</html>

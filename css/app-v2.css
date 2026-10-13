@@ -1,0 +1,760 @@
+/* ============================================================
+   app-v2.css — 新视觉组件层（S3-03 起，与旧视觉 styles.css 共存）
+   颜色/字体/字号一律引用 tokens.css 变量；
+   一次性版式坐标（left/top/width/height 等）由页面内联 style 提供。
+   手绘质感（DESIGN_SPEC 2.3）：SVG 内联 + 共享 filter，
+   #handdrawn（弱抖 scale 1.5）/ #handdrawn-strong（强抖 scale 3），
+   filter <defs> 由页面提供一次（迁移后收口到 index.html）。
+   ============================================================ */
+
+/* S3-04：box-sizing 收窄到 .v2-phone 子树——index.html 引入本文件后
+   不再对旧视觉（styles.css 布局）产生全局影响；mock 页内容全在 .v2-phone 内，渲染不变。 */
+.v2-phone,.v2-phone *,.v2-phone *::before,.v2-phone *::after{box-sizing:border-box;}
+
+/* ===== 手机框（390×693 = Keynote 1080×1920 ×0.3611，DESIGN_SPEC 9） ===== */
+.v2-phone{
+  position:relative;
+  width:390px;
+  height:693px;
+  background:var(--color-paper);
+  overflow:hidden;
+}
+
+/* ===== 顶部标题区 ===== */
+.v2-title-block{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:260px; /* S3-05：只盖标题区（0–260px），275px 起的输入框不受 pointer-events 影响 */
+  pointer-events:none;
+}
+.v2-title{
+  position:absolute;
+  left:0;right:0;
+  margin:0;
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:var(--fs-lg);
+  color:var(--color-ink);
+  line-height:1.1;
+}
+.v2-subtitle{
+  position:absolute;
+  left:0;right:0;
+  text-align:center;
+  font-family:var(--font-accent);
+  font-size:var(--fs-body);
+  color:var(--color-muted);
+  line-height:1.2;
+}
+
+/* ===== 输入框（框线为 SVG 手绘 rect，由页面提供） ===== */
+.v2-input-box{position:absolute;}
+.v2-input-placeholder{
+  position:absolute;
+  font-family:var(--font-system);
+  font-size:var(--fs-caption);
+  color:var(--color-muted);
+  pointer-events:none;
+}
+
+/* ===== 主按钮（SVG 手绘底 + 文字，DESIGN_SPEC 2.4） ===== */
+.v2-btn-primary{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.v2-btn-text{
+  /* S3-06 修复：铺满 .v2-btn-primary 容器——原 position:relative 时按钮只有文字大小，
+     SVG 底框的空白区点不到 button；改后整个按钮矩形都是热区 */
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:flex; /* 文字在容器内居中（原 flex 居中由容器提供，现容器被铺满故移到 button 上） */
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-accent);
+  font-size:var(--fs-base);
+  color:var(--color-paper);
+  background:none;border:none;padding:0; /* S3-05：作为 <button> 使用时清原生样式 */
+}
+
+/* ===== 底部灰字 ===== */
+.v2-footer-note{
+  position:absolute;
+  left:0;right:0;
+  text-align:center;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  color:var(--color-muted);
+}
+
+/* ===== 三 tab ===== */
+.v2-tab-bar{
+  position:absolute;
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:var(--fs-xl);
+  color:var(--color-muted);
+}
+
+/* ===== 印章（DESIGN_SPEC 2.5，每页一枚，首页无；位置/文字内联） ===== */
+.v2-seal{
+  position:absolute;
+  width:44px;
+  height:44px;
+  background:var(--color-cinnabar);
+  color:var(--color-paper);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-accent);
+}
+
+/* ===== 底部装饰容器（内容为 SVG，由页面提供） ===== */
+.v2-deco-wrap{
+  position:absolute;
+  pointer-events:none;
+}
+
+/* ===== SVG 描边/填充工具类（替代 SVG 属性里的硬编码色值） ===== */
+.stroke-ink{stroke:var(--color-ink);}
+.stroke-cinnabar{stroke:var(--color-cinnabar);}
+.fill-cinnabar{fill:var(--color-cinnabar);}
+/* S3-06 载录页新增：下划线灰 / 选中分类圆底 */
+.stroke-muted{stroke:var(--color-muted);}
+.fill-sel-bg{fill:var(--color-sel-bg);}
+
+/* ============================================================
+   S3-04 tab 路由骨架（功能向，非 mock）
+   .v2-tab-bar 是 mock 手机框组件，与本段互不相干；S3-05~07 各屏迁移时统一重做。
+   ============================================================ */
+
+.tabbar{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:30; /* 低于 sheet-mask(50)/toast(60)：弹层开着时 tab 被遮罩盖住，不可点 */
+  display:flex;
+  background:var(--color-paper);
+}
+/* 修复①（2026-09-20，S3-08 验收发现）：上方 display:flex 盖过 UA 样式表的
+   [hidden]{display:none}（作者源优先于 UA 源），showView 置 hidden 属性失效——
+   模态页（载录/阅踪）与 error 态从 S3-04 起就藏不住 tab 栏。补显式规则根治 */
+.tabbar[hidden]{display:none;}
+.tabbar__btn{
+  flex:1;
+  min-height:56px;
+  padding:0;
+  border:none;
+  background:none;
+  font-family:var(--font-display);
+  font-size:var(--fs-xl);
+  color:var(--color-muted);
+}
+.tabbar__btn.is-active{color:var(--color-cinnabar);}
+
+/* 固定 tab 栏让位：防盖住首页底部数据管理卡（env 兜底 iPhone 底部安全区） */
+.app{padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px));}
+
+/* ===== S3-04 占位空壳卡（内容迁移后随壳一起删） ===== */
+.placeholder-card{text-align:center;}
+.placeholder-card__title{
+  margin:0 0 8px;
+  font-family:var(--font-display);
+  font-size:var(--fs-md);
+  color:var(--color-ink);
+}
+.placeholder-card__note{
+  margin:0;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  color:var(--color-muted);
+}
+
+/* ============================================================
+   S3-05 首页（absolute 坐标模式，坐标同 mock/home-preview.html）
+   .v2-page 是定位原点（替代 mock 的 .v2-phone + .content 两层）；
+   变高视口下底部元素错位的响应式改造留 Sprint 4。
+   ============================================================ */
+
+/* 旧视觉 .app 的 padding（styles.css）与 390px 坐标系冲突：
+   手机上左右 16px 会把坐标容器压成 358px，新视觉页自带坐标，置零；
+   占位卡 / 错误卡补回留白 */
+.app{padding:0;}
+.placeholder-card{margin:16px;}
+.error-card{margin:16px;}
+
+/* 旧视觉 body 的点阵纹理（styles.css 径向渐变）随新视觉移除：纯纸底，与 tab 栏一致 */
+body{
+  background-image:none;
+  background-color:var(--color-paper);
+}
+
+.v2-page{
+  position:relative;
+  width:390px;
+  max-width:100%;
+  margin:0 auto;
+  height:calc(100vh - 72px); /* 72px = S3-04 tab 栏让位 */
+}
+/* S3-06 载录模态页无 tab 栏，不让 72px */
+.v2-page--full{height:100vh;}
+
+/* ===== 从 mock <style> 搬入的页面辅助类 ===== */
+.input-svg{
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+  overflow:visible;
+  pointer-events:none;
+}
+.mic-icon{
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+  width:32px;height:32px;
+  pointer-events:none; /* PENDING #18 修复：装饰话筒不拦点击（与 .input-svg/.btn-bg 同法），热区归下方真实输入框 */
+}
+.btn-bg{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  pointer-events:none; /* S3-06 修复：装饰底框不拦点击（与 .input-svg 同法），热区归铺满的 button */
+}
+.deco-svg{
+  position:absolute;
+  inset:0;
+  overflow:visible;
+}
+
+/* ===== 真实输入框（mock 只有装饰 placeholder，App 需要可输入） ===== */
+.v2-input-real{
+  position:absolute;
+  inset:0;
+  padding:0 60px 0 26px; /* 右侧避让话筒图标 */
+  background:none;
+  border:none;
+  font-family:var(--font-accent);
+  font-size:var(--fs-base);
+  color:var(--color-ink);
+  outline:none; /* S3-06：去 Safari 系统蓝聚焦框——手绘朱砂 SVG 框即输入区视觉标识，
+                   叠朱砂 outline 属双层框冗余；焦点另有光标+软键盘指示。
+                   载录页将来真输入框（PENDING #16 接线时）沿用同法 */
+}
+.v2-input-real::placeholder{
+  font-family:var(--font-system);
+  font-size:var(--fs-caption);
+  color:var(--color-muted);
+}
+
+/* ============================================================
+   S3-06 载录页（absolute 坐标模式，坐标同 mock/record-preview.html）
+   金额/分类为静态展示；解析预填与保存随 PENDING #16 接线。
+   字号口径：卷号 11 / 小标题 13 为 DESIGN_SPEC 9.1 表落地值，tokens 暂无
+   对应档（caption 14 / note 12 都不对），先字面值，缺口随 PENDING #7 回写定。
+   ============================================================ */
+
+/* 印章（位图素材 seal-ji.png；.v2-seal 实底方块方案本轮不采用） */
+.v2-record-seal{
+  position:absolute;
+  width:44px;
+  height:44px;
+}
+
+/* 页题（左对齐，区别于首页居中的 .v2-title） */
+.v2-record-title{
+  position:absolute;
+  margin:0;
+  font-family:var(--font-display);
+  font-size:var(--fs-md);
+  line-height:1;
+  color:var(--color-ink);
+}
+
+/* 对仗 + 卷号（右对齐；对仗逐字字号 16-21px 内联，同 mock） */
+.v2-record-couplet{
+  position:absolute;
+  margin:0;
+  font-family:var(--font-accent);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:1px;
+  text-align:right;
+}
+.v2-juan{
+  position:absolute;
+  margin:0;
+  font-family:var(--font-accent);
+  font-size:11px; /* 9.1：页面卷号 30pt→11px，无 token（--fs-note 12 差 1px） */
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:1px;
+  text-align:right;
+}
+
+/* ← 返回入口：44×32 热区（视觉箭头约 40×16，内缩 4px 落位） */
+.v2-record-back{
+  position:absolute;
+  width:44px;
+  height:32px;
+  padding:0;
+  border:none;
+  background:none;
+}
+.v2-record-back svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+/* 五字段小标题（金额/分类/时间/地点/备注） */
+.v2-field-label{
+  position:absolute;
+  font-family:var(--font-system);
+  font-size:13px; /* 9.1：小标题 36pt→13px，无 token */
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:6px;
+}
+
+/* 金额行 */
+.v2-amount-row{
+  position:absolute;
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  font-family:var(--font-accent);
+  font-size:var(--fs-xl);
+  line-height:1;
+  color:var(--color-ink);
+}
+.v2-amount-num{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:1px;
+}
+
+/* 手绘下划线（按线定宽高，区别于满容器 .input-svg） */
+.line-svg{
+  position:absolute;
+  pointer-events:none;
+}
+
+/* 分类项（mock 空 .cat-card 无视觉作用——条目实际参照 .content 定位，实装省略） */
+.v2-cat-item{
+  position:absolute;
+  width:52px;
+  text-align:center;
+}
+.v2-cat-item svg{
+  display:block;
+  width:52px;
+  height:52px;
+  overflow:visible;
+}
+.v2-cat-icon{
+  position:absolute;
+  top:9px;
+  left:9px;
+  width:34px;
+  height:34px;
+  mix-blend-mode:multiply;
+}
+.v2-cat-name{
+  margin-top:7px;
+  font-family:var(--font-accent);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-ink);
+  letter-spacing:1px;
+}
+.v2-cat-item.is-sel .v2-cat-name{color:var(--color-cinnabar);}
+
+/* ============================================================
+   S3-07 账簿页（absolute 坐标模式，坐标同 mock/ledger-preview.html）
+   一行 = 一天；竖虚线用 CSS border 画（人拍板），高度随行数自动跟随，
+   不搬 mock 的 #handShakeVert SVG 滤镜。印章/页题/对仗/卷号复用 S3-06 的
+   .v2-record-seal/.v2-record-title/.v2-record-couplet/.v2-juan（指标与 mock 相同）。
+   字号 15px（行主行/金额）不在 tokens 档内，照 S3-06 先例用字面值（PENDING #7）。
+   ============================================================ */
+
+/* 查 / 清按钮容器（114×47；文字 18px 档 = --fs-body，盖过 .v2-btn-text 的 16px） */
+.v2-ledger-btn{
+  position:absolute;
+  top:127px;
+  width:114px;
+  height:47px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.v2-ledger-btn .v2-btn-text{
+  font-size:var(--fs-body);
+  letter-spacing:0;
+}
+.v2-ledger-btn--cha .v2-btn-text{color:var(--color-paper);}
+.v2-ledger-btn--qing .v2-btn-text{color:var(--color-cinnabar);}
+
+/* 空态置灰（决策 3：纯视觉、仍可点）：两枚统一变虚线灰描边 + 灰字（mock 空态同款）。
+   CSS 规则优先级高于 SVG 呈现属性与 .fill-cinnabar/.stroke-cinnabar 类，实心查框也被覆盖 */
+.v2-ledger-btn.is-muted rect{
+  fill:none;
+  stroke:var(--color-muted);
+  stroke-dasharray:90 4 26 3 58 4 42 3;
+}
+.v2-ledger-btn.is-muted .v2-btn-text{color:var(--color-muted);}
+
+/* 列表滚动区：按钮区下(174) → 合计条顶缘（bottom:43 = 带高，列表底贴合计条顶）。
+   S3-07 验收修复：原 bottom:151px 是 mock 693 框（693-542）的错推导——tab 区已被
+   .v2-page 的 height:calc(100vh-72px) 排除，再扣 151 等于把 tab 区扣两遍 */
+.v2-ledger-list{
+  position:absolute;
+  left:0;
+  top:174px;
+  width:100%;
+  bottom:43px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* 时间轴容器：首行让位 43px（mock 行 1 top）；::before 画竖虚线，从首圆点下缘到底 */
+.v2-ledger-timeline{
+  position:relative;
+  min-height:100%;
+  padding-top:43px;
+}
+.v2-ledger-timeline::before{
+  content:'';
+  position:absolute;
+  left:40px;   /* mock 圆点列页面 x=41，2px 线占 40-42 */
+  top:56px;    /* mock 虚线起点 y=56.5（首圆点 r=5.5，50.5+5.5） */
+  bottom:0;
+  border-left:2px dashed rgba(59,54,47,0.3);
+}
+
+/* 一天 = 一行（mock 行距 81~83px，统一 82px）。子元素按 mock 行内偏移绝对定位 */
+.v2-ledger-row{
+  position:relative;
+  height:82px;
+}
+.v2-ledger-row__dot{
+  position:absolute;
+  left:35.5px;  /* 圆心对齐虚线 x=41：41 - 5.5 */
+  top:2px;      /* 圆心在主行文字垂直居中位（mock 圆心 = 行顶 +7.5px） */
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  box-sizing:border-box; /* 空心圆 border 计入 11px，与实心圆同径 */
+  background:var(--color-cinnabar);
+}
+.v2-ledger-row__dot.is-first{
+  background:transparent;
+  border:2px solid rgba(59,54,47,0.3);
+}
+.v2-ledger-row__date{
+  position:absolute;
+  left:69px;
+  top:0;
+  font-family:var(--font-accent);
+  font-size:15px;
+  line-height:1;
+  color:var(--color-ink);
+}
+/* S3-08 决策 2：日期带年份（YYYY年M月D日，最宽 ≈113px）加宽日期列，主行 130 → 200 */
+.v2-ledger-row__main{
+  position:absolute;
+  left:200px;
+  top:0;
+  font-family:var(--font-accent);
+  font-size:15px;
+  line-height:1;
+  color:var(--color-ink);
+}
+.v2-ledger-row__sub{
+  position:absolute;
+  left:69px;
+  top:26px;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:1px;
+}
+.v2-ledger-row__amount{
+  position:absolute;
+  right:81px;
+  top:0;
+  font-family:var(--font-accent);
+  font-size:15px;
+  line-height:1;
+  color:var(--color-ink);
+  font-variant-numeric:tabular-nums;
+}
+
+/* 合计条（底锚定：bottom:0 = .v2-page 底 = 视口底-72px，即 tab 栏(实高56px)上方 ~16px。
+   S3-07 验收修复：原 bottom:108px 是 mock 手机框 693 含三 tab 装饰区的距离，
+   实装 tab 区已在页高让位中扣除，再扣 108 会把合计条抬高一大段（人验收发现） */
+.v2-ledger-total{
+  position:absolute;
+  left:23px;
+  right:23px;
+  bottom:0;
+  height:43px;
+  background:rgba(59,54,47,0.08);
+}
+.v2-ledger-total-label{
+  position:absolute;
+  left:42px;   /* mock 页面 left:65 - 带左缘 23 */
+  top:15px;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:4px;
+}
+.v2-ledger-total-num{
+  position:absolute;
+  right:31px;  /* mock 页面 right:54 - 带右缘 23 */
+  top:13px;
+  font-family:var(--font-accent);
+  font-size:16px;
+  line-height:1;
+  color:var(--color-ink);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:1px;
+}
+
+/* 空态（#ledger-empty 为普通 div，子元素绝对定位锚到 .v2-page；整块 hidden 切换） */
+.v2-ledger-empty-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:296px;
+  margin:0;
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:30px;
+  line-height:1;
+  color:var(--color-ink);
+  letter-spacing:2px;
+}
+.v2-ledger-empty-sub{
+  position:absolute;
+  left:0;
+  right:0;
+  top:357px;
+  text-align:center;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:2px;
+}
+.v2-ledger-restart{
+  position:absolute;
+  left:35px;
+  top:413px;
+  width:319px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.v2-ledger-restart .v2-btn-text{
+  color:var(--color-paper);
+  font-size:var(--fs-body);
+  letter-spacing:12px;
+  text-indent:12px;
+}
+
+/* ============================================================
+   S3-08 阅踪页（统一明细页；无 mock，坐标按载录/账簿制式推定，2026-09-20 人拍板）。
+   印章/页题/对仗/卷号/← 复用 S3-06 类；合计条复用 .v2-ledger-total。
+   ============================================================ */
+
+/* 筛选输入：透明无框，覆在手绘下划线上方。原生 date 不加 max（未来日=查空无害）；
+   iOS 系统日历弹层样式碰不到（B-23 已知怪癖，真机验收盯） */
+.v2-trace-input{
+  position:absolute;
+  height:28px;
+  padding:0 2px;
+  border:none;
+  background:transparent;
+  font-family:var(--font-accent);
+  font-size:15px;
+  /* 修复⑦②（2026-09-20）：34px 反向拉距，归位 = 框高（居中口径确定）；
+     贴线目标由几何达成——input top:142 + 下划线 top:166，字形底距线 ≈2.5px */
+  line-height:28px;
+  color:var(--color-ink);
+}
+/* 修复⑤：聚焦不出系统蓝框，只留光标（同首页输入做法） */
+.v2-trace-input:focus{
+  outline:none;
+}
+/* 修复②（2026-09-20 人拍板）：date 未聚焦且无值时藏 placeholder——iOS 灰字
+   （如「1990年1月1日」）曾让用户误以为已填（D1 根因）。有值时 JS 加 .has-value，
+   聚焦时也正常显示 */
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit{
+  color:transparent;
+}
+/* 修复②追加（2026-09-20 人验收反馈）：Safari date 数字实际走 -webkit-text-fill-color，
+   上一条 color:transparent 不生效（控制台实测仍是墨色 rgb(59,54,47)）。双重覆盖：
+   整框 + 各分位伪元素同时压 color 与 fill-color。原选择器保留不动 */
+.v2-trace-input[type="date"]:not(:focus):not(.has-value),
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit,
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit-text,
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit-year-field,
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit-month-field,
+.v2-trace-input[type="date"]:not(:focus):not(.has-value)::-webkit-datetime-edit-day-field {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 按钮（同账簿查/清配方，尺寸不固定——寻踪 80×40、归档/存卷 149×47 由内联定） */
+.v2-trace-btn{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.v2-trace-btn .v2-btn-text{
+  font-size:var(--fs-body);
+  letter-spacing:0;
+}
+.v2-trace-btn--shi .v2-btn-text{color:var(--color-paper);}
+.v2-trace-btn--xu .v2-btn-text{color:var(--color-cinnabar);}
+/* 置灰（批 2 [存卷] 带地点时用；纯视觉变灰、仍可点，同账簿空态按钮决策 3 口径） */
+.v2-trace-btn.is-muted rect{
+  fill:none;
+  stroke:var(--color-muted);
+  stroke-dasharray:90 4 26 3 58 4 42 3;
+}
+.v2-trace-btn.is-muted .v2-btn-text{color:var(--color-muted);}
+
+/* 列表滚动区：操作行下(310，2026-09-20 筛选条上移压缩让位) → 合计条顶缘(bottom:43) */
+.v2-trace-list{
+  position:absolute;
+  left:0;
+  top:310px;
+  width:100%;
+  bottom:43px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+/* 时间轴容器：竖虚线从首组圆点下缘（组头 44 高、圆心 22 + r 5.5 ≈ 28）画到底 */
+.v2-trace-timeline{
+  position:relative;
+  min-height:100%;
+}
+.v2-trace-timeline::before{
+  content:'';
+  position:absolute;
+  left:40px;   /* 圆点列页面 x=41，2px 线占 40-42（同账簿） */
+  top:28px;
+  bottom:0;
+  border-left:2px dashed rgba(59,54,47,0.3);
+}
+
+/* 日期组头 = 一组：圆点 + 日期大字（19px 无 token 档，照 S3-06/07 字面值先例） */
+.v2-trace-group{
+  position:relative;
+  margin-bottom:14px;
+}
+.v2-trace-date{
+  position:relative;
+  height:44px;
+}
+.v2-trace-date__dot{
+  position:absolute;
+  left:35.5px;  /* 圆心对齐虚线 x=41：41 - 5.5（同账簿） */
+  top:16.5px;   /* (44-11)/2 组头内垂直居中 */
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  box-sizing:border-box;
+  background:var(--color-cinnabar);
+}
+.v2-trace-date__dot.is-first{
+  background:transparent;
+  border:2px solid rgba(59,54,47,0.3);
+}
+.v2-trace-date__text{
+  position:absolute;
+  left:69px;
+  top:0;
+  height:44px;
+  line-height:44px;
+  font-family:var(--font-accent);
+  font-size:19px;
+  color:var(--color-ink);
+}
+
+/* 每笔两行：主行 note（15px 墨）+ 副行 地点·分类（12px 灰）；金额右对齐垂直居中 */
+.v2-trace-entry{
+  position:relative;
+  height:56px;
+}
+.v2-trace-entry__main{
+  position:absolute;
+  left:69px;
+  right:160px; /* 修复⑨：left+right 定宽，长 note 省略号截断，不压金额区 */
+  top:8px;
+  font-family:var(--font-accent);
+  font-size:15px;
+  line-height:1;
+  color:var(--color-ink);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.v2-trace-entry__sub{
+  position:absolute;
+  left:69px;
+  top:30px;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:1px;
+}
+.v2-trace-entry__amount{
+  position:absolute;
+  right:81px;
+  top:0;
+  height:56px;
+  line-height:56px;
+  font-family:var(--font-accent);
+  font-size:15px;
+  color:var(--color-ink);
+  font-variant-numeric:tabular-nums;
+}
+
+/* 空态（引导/无结果共用一处；子元素绝对定位锚到 .v2-page，配方同账簿空态，间距同 61px） */
+.v2-trace-empty-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:440px;
+  margin:0;
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:30px;
+  line-height:1;
+  color:var(--color-ink);
+  letter-spacing:2px;
+}
+.v2-trace-empty-sub{
+  position:absolute;
+  left:0;
+  right:0;
+  top:501px;
+  text-align:center;
+  font-family:var(--font-system);
+  font-size:var(--fs-note);
+  line-height:1;
+  color:var(--color-muted);
+  letter-spacing:2px;
+}

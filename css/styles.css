@@ -1,0 +1,812 @@
+/* styles.css — 干净手绘风（PROJECT_BRIEF 第 13 节，2026-09-11 确认版） */
+
+:root {
+  /* 配色 */
+  --c-primary: #4CAF50;
+  --c-primary-press: #3D8B40;
+  --c-primary-tint: #E8F5E9;
+  --c-expense: #E0493C;
+  --c-expense-press: #C23B30;
+  --c-expense-tint: #FDECEA; /* 支出红的浅底（与 --c-primary-tint 对称取法），danger 按钮按压态 */
+  --c-ink: #2F2B26;
+  --c-text-muted: #8B857A;
+  --c-paper: #FAF6EC;
+  --c-card: #FFFDF8;
+  --c-highlight: #FFE082;
+  --c-divider: #DCD4C2;
+  --c-scrim: rgba(47, 43, 38, .38);
+
+  /* 描边 / 圆角 / 阴影 */
+  --bw: 2px;
+  --radius-card: 14px 20px 16px 22px;
+  --radius-btn: 10px 16px 12px 18px;
+  --radius-input: 12px 10px 14px 10px;
+  --radius-sheet: 20px 24px 0 0;
+  --radius-chip: 999px;
+  --shadow-card: 3px 3px 0 0 var(--c-ink);
+  --shadow-btn: 4px 4px 0 0 var(--c-ink);
+
+  /* 间距 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --fs-caption: 20px;
+  --fs-body: 20px;
+  --fs-btn: 22px;
+  --fs-title: 24px;
+  --fs-amount-row: 28px; /* 13.2：流水金额行字号 */
+  --fs-amount-card: 34px; /* 13.2/S1-05：汇总卡金额字号 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* S2-02：任一 sheet 打开期间锁定背景滚动。
+   position:fixed + JS 写入的 top:-scrollY 是 iOS Safari 下唯一能挡住手势回弹的锁法
+   （仅 overflow:hidden 挡不住 body 的橡皮筋滚动）；width:100% 防 fixed 后宽度塌缩。 */
+body.sheet-open {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--c-ink);
+  background-color: var(--c-paper);
+  background-image: radial-gradient(var(--c-divider) 1.2px, transparent 1.3px);
+  background-size: 22px 22px;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--sp-6) var(--sp-4);
+}
+
+.view[hidden] {
+  display: none;
+}
+
+/* ---------- 通用组件配方（BRIEF 13.6） ---------- */
+
+.card {
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--sp-4);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-input);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  color: var(--c-ink);
+  padding: var(--sp-3);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--c-primary);
+  box-shadow: 3px 3px 0 0 var(--c-primary);
+}
+
+.btn {
+  width: 100%;
+  min-height: 64px;
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-btn);
+  font-family: var(--font-sans);
+  font-size: var(--fs-btn);
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .12s ease-out, box-shadow .12s ease-out, background-color .12s ease-out;
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 0 var(--c-ink);
+}
+
+.btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  background: var(--c-primary);
+}
+
+.btn--primary:active {
+  background: var(--c-primary-press);
+}
+
+.btn--danger {
+  background: var(--c-expense);
+}
+
+.btn--danger:active {
+  background: var(--c-expense-press);
+}
+
+/* ---------- S0-02 顶栏与账户下拉 ---------- */
+
+.topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.topbar__app {
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+/* ---------- 启动失败错误视图（复用 .card / .btn--primary / .onboard-title，S0 审查修复） ---------- */
+
+.error-card {
+  margin-top: var(--sp-8);
+}
+
+.onboard-title {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.error-message {
+  margin: var(--sp-2) 0 var(--sp-4);
+  font-size: var(--fs-caption);
+  color: var(--c-expense);
+  word-break: break-all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+/* ---------- S1-01 文本录入 + 临时识别预览 ---------- */
+
+.entry-card {
+  margin-top: var(--sp-4);
+}
+
+.entry-preview {
+  margin-top: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--c-paper);
+  border: var(--bw) dashed var(--c-ink);
+  border-radius: var(--radius-input);
+}
+
+.entry-preview[hidden] {
+  display: none;
+}
+
+.entry-preview__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin: var(--sp-2) 0;
+}
+
+.entry-preview__tag {
+  flex: none;
+  font-weight: 600;
+}
+
+.entry-preview__text {
+  word-break: break-all;
+}
+
+.entry-preview__amount {
+  color: var(--c-expense);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-preview__amount.is-empty {
+  color: var(--c-text-muted);
+  font-weight: 400;
+}
+
+.entry-preview__note {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+/* ---------- S1-02 写入前确认弹窗（.sheet 配方，BRIEF 13.6） ---------- */
+
+.sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--c-scrim);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet-mask[hidden] {
+  display: none; /* 显隐只用 display 切换（硬约束 6），不用 alert/confirm */
+}
+
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--c-card);
+  border-top: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-sheet);
+  box-shadow: 0 -4px 0 0 var(--c-ink);
+  padding: var(--sp-6) var(--sp-4) var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.sheet__title {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-title);
+  font-weight: 600;
+  text-align: center;
+}
+
+.sheet__label {
+  margin: var(--sp-1) 0 var(--sp-1);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+
+.sheet__field {
+  width: 100%;
+}
+
+/* 类别胶囊选择器：8 类，单选，选中态高亮 */
+.sheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.chip {
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-chip);
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--c-card);
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  color: var(--c-ink);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.chip.is-selected {
+  background: var(--c-primary-tint);
+  font-weight: 600;
+}
+
+/* 日期快捷按钮 + 原生日期输入 */
+.sheet__date-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+}
+
+.date-shortcut {
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-input);
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--c-card);
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  color: var(--c-ink);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.date-shortcut:active {
+  background: var(--c-primary-tint);
+}
+
+.sheet__date-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* 日期常驻说明（S1-02 验收方案 A） */
+.sheet__hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+/* 弹窗内错误提示 */
+.sheet__error {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--c-expense);
+  text-decoration: underline wavy var(--c-expense) 2px;
+  text-underline-offset: 4px;
+  min-height: 1.4em; /* 占位，避免出现/消失时布局跳动 */
+}
+
+/* B-11 修复：双按钮并排。.btn 原有 width:100% 仅作用于单按钮；
+   放进 .btn-row 的按钮覆盖为平分宽度，不影响创建/记一笔/刷新等单按钮。 */
+.btn-row {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+
+.btn-row .btn {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 操作反馈 toast（S2-03 验收：底部固定位置视线够不着，人多次没看清，改为屏幕顶部横幅）。
+   定位在顶栏【下方】而非盖在顶栏之上（当时顶栏含账户下拉，不能拦截其点击）。S3-04 起
+   顶栏标记已随单账户改造移除，84px 作为验收定值保留：top = .app 上内边距 24(--sp-6)
+   + 48 + 间距 12(--sp-3) = 84px，其中 48 硬编码待抽 token（B-47）。
+   动效（BRIEF 13.5-7）：从顶沿外平移进入 120ms；is-shown 由 JS 在双 rAF 后添加，避开
+   display:none→block 同帧提交被 Safari 吞掉过渡的首帧；reduced-motion 下全部过渡关闭。 */
+.toast {
+  position: fixed;
+  top: calc(var(--sp-6) + 48px + var(--sp-3));
+  left: 50%;
+  z-index: 60;
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--c-primary);
+  white-space: normal;
+  /* S2-03 review：长文案（如「✅ 已保存修改，该笔不在当前时间段」）窄屏溢出——
+     最宽不贴屏幕两缘（两侧各留 --sp-4），无空格长串也能任意字符处断行 */
+  max-width: calc(100vw - var(--sp-8));
+  overflow-wrap: anywhere;
+  text-align: center; /* 允许换行后多行仍保持横幅居中观感 */
+  /* 初始态：屏外上方（top 84 + 自身高度，-200% 已整体越过视口顶沿）+ 透明 */
+  opacity: 0;
+  transform: translateX(-50%) translateY(-200%);
+  transition: transform .12s ease-out, opacity .12s ease-out;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+.toast.is-shown {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) rotate(0.8deg); /* 保留手绘风微旋转 */
+}
+
+.toast.is-fading {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-200%); /* 原路滑出顶沿 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.is-fading {
+    transition: none; /* 13.5-7：减少动态偏好直接出现/消失，不平移不淡入淡出 */
+  }
+}
+
+/* ---------- S1-05 顶部汇总卡片（13.5-2：左 -0.6° / 右 +0.6° 容器级歪斜） ---------- */
+
+.summary {
+  display: flex;
+  gap: var(--sp-3);
+  margin: var(--sp-4) 0;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 0; /* 允许内部金额省略，不撑破双卡布局（窄屏四位数防护） */
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.summary-card--today {
+  transform: rotate(-0.6deg);
+}
+
+.summary-card--total {
+  transform: rotate(0.6deg);
+}
+
+.summary-card__label {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+.summary-card__amount {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-amount-card);
+  font-weight: 600;
+  color: var(--c-expense);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 今日分类速览：TOP 3 胶囊；无消费时显示 muted 文案 */
+.summary-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-3);
+}
+
+.summary-top__chip {
+  border: var(--bw) solid var(--c-divider);
+  border-radius: var(--radius-chip);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+  white-space: nowrap;
+}
+
+.summary-top__empty {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+/* ---------- S1-04 流水列表（按 happenedAt 分组，最新在最上） ---------- */
+
+.list-section {
+  margin-top: var(--sp-4);
+}
+
+.date-group + .date-group {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: var(--bw) dashed var(--c-divider); /* 13.3：手绘风虚线分割 */
+}
+
+/* 日期组头：荧光笔高亮（13.5-4）+ 今天/昨天尾注 */
+.date-group__title {
+  display: inline-block;
+  margin: 0 0 var(--sp-2);
+  padding: 0 var(--sp-2);
+  background: var(--c-highlight);
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.date-group__note {
+  margin-left: var(--sp-2);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+}
+
+/* 单条账目：主行原文 / 副行类别+时间 / 右对齐金额（红色支出） */
+.entry-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+}
+
+.entry-item__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-item__text {
+  margin: 0;
+  word-break: break-all;
+}
+
+.entry-item__sub {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+.entry-item__amount {
+  flex: none;
+  font-size: var(--fs-amount-row);
+  font-weight: 600;
+  color: var(--c-expense);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 该日分类消费明细：只含当日金额 > 0 的分类（图标/名称由渲染层从 CATEGORY_META 取） */
+.cat-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin: var(--sp-2) 0 0;
+}
+
+.cat-summary__chip {
+  border: var(--bw) solid var(--c-divider);
+  border-radius: var(--radius-chip);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+/* 本日小计：组底一行，与明细间虚线分隔 */
+.date-group__subtotal {
+  margin: var(--sp-2) 0 0;
+  padding-top: var(--sp-2);
+  border-top: var(--bw) dashed var(--c-divider);
+  text-align: right;
+  font-weight: 600;
+}
+
+/* 空状态：歪斜贴纸感（13.5-2）+ 简笔收据插画（自绘线条，无填充色块） */
+.list-empty {
+  text-align: center;
+  padding: var(--sp-6) 0 var(--sp-4);
+}
+
+.list-empty__frame {
+  display: inline-block;
+  padding: var(--sp-4);
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transform: rotate(-1.2deg);
+  color: var(--c-ink);
+}
+
+.list-empty__text {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+/* ---------- S2-01 时间段筛选（E-04 读侧；呈现细节归 UI 批处理 B-32⑥⑦⑧） ---------- */
+
+.filter-card {
+  margin-top: var(--sp-4);
+}
+
+.filter-card__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.filter-card__field {
+  margin-bottom: var(--sp-3);
+}
+
+/* 区间信息条：筛选激活时插在筛选卡与列表之间；只描述列表口径（D5） */
+.range-bar {
+  margin: var(--sp-4) 0 0;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.range-bar__dates {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+}
+
+.range-bar__total {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.range-bar__total .amount {
+  color: var(--c-expense);
+  font-variant-numeric: tabular-nums;
+}
+
+/* S2-01 补充：区间内分类合计；胶囊直接复用列表 .cat-summary__chip 样式，仅布局容器新增。
+   呈现细节归 UI 批处理 B-32。 */
+.range-bar__cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+
+.range-bar__cats[hidden] {
+  display: none;
+}
+
+/* 次级操作（非主 CTA），与 date-shortcut 同级 40-48px 档；虚线描边弱化 */
+.range-bar__clear {
+  min-height: 48px;
+  margin-top: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--c-card);
+  border: var(--bw) dashed var(--c-ink);
+  border-radius: var(--radius-input);
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  color: var(--c-ink);
+  cursor: pointer;
+}
+
+.range-bar__clear:active {
+  background: var(--c-primary-tint);
+}
+
+/* ---------- S2-02 记录编辑与删除（E-04 写侧；操作 sheet 复用 .sheet-mask/.sheet 配方） ---------- */
+
+/* 条目右侧「⋯」操作入口：视觉体 32px，但触控区 48×48（与规格里麦克风按钮同款处理，
+   通过负 margin + padding 把可点击区域撑到 48，不破坏行高与金额对齐）。 */
+.entry-item__action {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -8px;       /* 抵消 padding，使视觉中心回到行中线 */
+  padding: 8px;       /* 触控区扩到 48×48 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-divider);
+  border-radius: var(--radius-chip);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  box-sizing: content-box; /* padding 计入触控区但不改变视觉边框尺寸 */
+}
+
+.entry-item__action:active {
+  background: var(--c-primary-tint);
+  color: var(--c-ink);
+}
+
+/* 操作 sheet 顶部：该条原文 · ¥金额 */
+.action-sheet__title {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+  text-align: center;
+  word-break: break-all;
+}
+
+/* 操作 / 删除 sheet 内的动作按钮：垂直排列，每项 64px 主 CTA 档 */
+.action-btn {
+  width: 100%;
+  min-height: 64px;
+  background: var(--c-card);
+  border: var(--bw) solid var(--c-ink);
+  border-radius: var(--radius-input);
+  font-family: var(--font-sans);
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--c-ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+}
+
+.action-btn:active {
+  background: var(--c-paper);
+}
+
+.action-btn--danger {
+  color: var(--c-expense);
+  border-color: var(--c-expense);
+}
+
+.action-btn--danger:active {
+  background: var(--c-expense-tint);
+}
+
+.action-btn--muted {
+  border-color: var(--c-divider);
+  color: var(--c-text-muted);
+  box-shadow: none;
+}
+
+/* 删除二次确认文案 */
+.confirm-sheet__text {
+  margin: 0;
+  font-size: var(--fs-title);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.confirm-sheet__warn {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--c-text-muted);
+  text-align: center;
+  word-break: break-all;
+}
+
+/* S2-02 视觉方向变更（人拍板）：删除二次确认从底部 sheet 改为屏幕居中卡片
+   （参考淘宝优惠券弹窗：正中、四角圆、遮罩）。只覆盖定位与卡片外观，
+   显隐/hidden/滚动锁机制不变。用 id 选择器作用于 #delete-mask，不动 HTML/JS。
+   S2-03：清空两步确认的两个 sheet（.clear-mask）复用同一配方，仅并列选择器。 */
+#delete-mask,
+.clear-mask {
+  align-items: center; /* 覆盖 .sheet-mask 的 flex-end：垂直居中 */
+  padding: 0 var(--sp-6); /* 卡片与屏幕两侧留白，窄屏不贴边 */
+}
+
+#delete-mask .sheet,
+.clear-mask .sheet {
+  width: 100%;            /* 窄屏：屏宽减遮罩 padding；宽屏由 max-width 收口 */
+  max-width: 340px;
+  border: var(--bw) solid var(--c-ink); /* 覆盖底部 sheet 的仅顶边：四周描边 */
+  border-radius: var(--radius-card);    /* 四角圆（底部 sheet 只圆上角） */
+  box-shadow: 0 4px 0 0 var(--c-ink);    /* 硬投影改向下，贴合居中卡片语言 */
+  /* 长原文撑高：纵向最多吃到遮罩内 80vh，超出在卡片内部滚动（遮罩仍在、按钮可达性靠滚动保证） */
+  max-height: 80vh;
+}
+
+/* ---------- S2-03 数据管理卡（导出 + 清空入口；按钮复用 .btn 配方，全走 token） ---------- */
+
+.manage-card {
+  margin-top: var(--sp-4);
+}
+
+.manage-card__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+/* 卡内导出/清空两个按钮纵排：.btn 默认 width:100% 已满足，仅补纵向间距 */
+.manage-card .btn + .btn {
+  margin-top: var(--sp-3);
+}

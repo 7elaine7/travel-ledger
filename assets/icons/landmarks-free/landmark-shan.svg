@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <filter id="handShake" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="2.5"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="#3b362f" stroke-linecap="round" stroke-linejoin="round" filter="url(#handShake)">
+    <path d="M14 118 L44 48 L74 118" stroke-width="2.5"/>
+    <path d="M60 118 L84 68 L108 118" stroke-width="2.2"/>
+    <path d="M92 118 L112 84 L134 118" stroke-width="2"/>
+    <path d="M24 90 Q44 76 64 88" stroke-width="1.8" stroke-dasharray="30 3 10 4"/>
+    <path d="M52 98 Q72 88 92 96" stroke-width="1.8"/>
+    <path d="M78 106 Q94 98 110 105" stroke-width="1.6" stroke-dasharray="18 3 8 4"/>
+    <path d="M36 62 L44 52 L52 62" stroke-width="1.6"/>
+    <path d="M76 80 L84 72 L92 80" stroke-width="1.6"/>
+    <path d="M26 40 Q36 32 48 38" stroke-width="1.6" stroke-dasharray="20 3 8 4"/>
+    <path d="M60 30 Q70 24 82 30" stroke-width="1.6"/>
+    <path d="M100 38 Q108 33 118 38" stroke-width="1.6" stroke-dasharray="14 3 6 4"/>
+    <path d="M20 56 Q26 52 32 56" stroke-width="1.6"/>
+    <path d="M6 118 L144 118" stroke-width="2" stroke-dasharray="50 3 14 4"/>
+  </g>
+</svg>

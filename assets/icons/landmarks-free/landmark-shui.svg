@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <filter id="handShake" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="2.5"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="#3b362f" stroke-linecap="round" stroke-linejoin="round" filter="url(#handShake)">
+    <path d="M18 50 Q40 38 75 50 T132 50" stroke-width="2.4"/>
+    <path d="M18 80 Q40 68 75 80 T132 80" stroke-width="1.8" stroke-dasharray="40 3 12 4"/>
+    <path d="M18 110 Q40 98 75 110 T130 109" stroke-width="2.2"/>
+    <path d="M30 64 Q42 58 54 64" stroke-width="1.6"/>
+    <path d="M92 94 Q104 88 116 94" stroke-width="1.6"/>
+    <path d="M40 124 Q52 118 64 124" stroke-width="1.6"/>
+    <path d="M96 56 Q106 51 116 56" stroke-width="1.6"/>
+    <path d="M58 95 Q68 90 78 95" stroke-width="1.6" stroke-dasharray="14 3 6 4"/>
+  </g>
+</svg>
