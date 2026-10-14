@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="css/app-v2.css">
   <!-- S2-04 PWA：硬约束 5 + 5.2-F12 完全离线可用 -->
   <link rel="manifest" href="manifest.json">
+  <!-- 桌面浏览器标签页图标 -->
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
   <!-- iOS 主屏图标：iOS 不读 manifest icons，必须单独声明 180×180 PNG -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
   <!-- iOS standalone 双保险：display: standalone 在 iOS 15 是否被识别未核实，
@@ -98,27 +100,9 @@
         <!-- 底部灰字 -->
         <div class="v2-footer-note" style="top:580px; letter-spacing:1px;">日子翻过去，手账留下来。</div>
 
-        <!-- 底部装饰：毛笔带尾线 + 波浪线（墨色，#handdrawn） -->
-        <div class="v2-deco-wrap" style="left:45px; top:472px; width:300px; height:64px;" aria-hidden="true">
-          <svg class="deco-svg" viewBox="0 0 300 64">
-            <path d="M4 52 Q 30 40 56 52 T 108 52 T 160 52 T 184 52"
-                  class="stroke-ink" fill="none" stroke-width="2"
-                  stroke-linecap="round" stroke-opacity="0.35"
-                  filter="url(#handdrawn)"/>
-            <path d="M 214 46 Q 202 51 190 49"
-                  class="stroke-ink" fill="none" stroke-width="2"
-                  stroke-linecap="round" stroke-opacity="0.55"
-                  stroke-dasharray="7 3 4 3"
-                  filter="url(#handdrawn)"/>
-            <g fill="none" class="stroke-ink" stroke-width="2"
-               stroke-opacity="0.55" stroke-linecap="round"
-               stroke-linejoin="round" filter="url(#handdrawn)">
-              <path d="M 214 46 Q 220 28 246 21 L 250 26 Q 236 42 214 46 Z"/>
-              <path d="M 246 21 L 292 -3"/>
-              <path d="M 250 26 L 296 2"/>
-              <path d="M 292 -3 L 296 2"/>
-            </g>
-          </svg>
+        <!-- 底部装饰：毛笔带尾线（墨色，透明 PNG） -->
+        <div class="v2-deco-wrap" style="left:45px; top:472px; width:320px; height:90px;" aria-hidden="true">
+          <img src="assets/backgrounds/hero-brush.png" alt="" class="deco-svg" style="width:100%; height:100%; object-fit:contain;">
         </div>
 
       </div>

@@ -26,7 +26,6 @@
 | 文件 | 管什么 |
 |---|---|
 | AGENTS.md | AI 硬约束 + 决策授权 + 工作流 |
-| docs/DEEPSEEK_HANDOFF.md | 讨论 AI 的协作约定 |
 
 ## 四、方法层（Skill）
 

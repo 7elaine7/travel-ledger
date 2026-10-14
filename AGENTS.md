@@ -53,7 +53,6 @@
 | `BACKLOG.md` | B-xx 编号待办 | 排期时 |
 | `docs/PENDING.md` | 讨论中产生的零散待办 | AI 开工前 |
 | `SPRINTS.md` | Sprint 记录 + Retro | Sprint 边界 |
-| `docs/DEEPSEEK_HANDOFF.md` | 讨论 AI 的协作约定 | 主导 AI |
 
 ---
 

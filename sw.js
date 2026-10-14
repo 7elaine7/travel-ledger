@@ -16,7 +16,7 @@
 // app-shell 是静态资源、无运行时数据，cache-first 命中即返回、无网络延迟；
 // 非白名单 URL 一律 network-only，不缓存（避免误存业务数据）。
 
-const CACHE_VERSION = 'pwa-v14';
+const CACHE_VERSION = 'pwa-v15';
 const CACHE_NAME = `travel-ledger-${CACHE_VERSION}`;
 
 // 与 index.html <script> 列表保持同步

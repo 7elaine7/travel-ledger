@@ -52,7 +52,7 @@
 
 ### 4. 落档位置
 - docs/SPRINT<N>_RETRO.md — 完整 Retro 文档
-- 改进项同步到 AGENTS.md（第一档）或 docs/DEEPSEEK_HANDOFF.md（第二档）
+- 改进项同步到 AGENTS.md（第一档）
 
 ## 已知陷阱
 - Retro 变成吐槽会：只讨论"下次怎么改"，不追究"谁的责任"
