@@ -8,8 +8,8 @@
 ## 一、开工前必做（3 步）
 
 1. 读 `PROJECT_BRIEF.md` 第 6.5-D 条（禁 node/npm/无头浏览器/自动化脚本）
-2. 读 `docs/CURRENT_STATE.md`（当前进度快照）
-3. 读本文件全部规则 + `docs/PENDING.md` 的"当前暂存"
+2. 读 `docs/status/CURRENT_STATE.md`（当前进度快照）
+3. 读本文件全部规则 + `docs/status/PENDING.md` 的"当前暂存"
 
 ---
 
@@ -48,11 +48,11 @@
 | 文件 | 职责 | 谁读 |
 |---|---|---|
 | `PROJECT_BRIEF.md` | 技术约束（宪法） | AI 开工前 |
-| `DESIGN_SPEC.md` | 视觉规范 | 涉及 UI 时 |
-| `docs/CURRENT_STATE.md` | 进度快照 | AI 每次新窗口 |
-| `BACKLOG.md` | B-xx 编号待办 | 排期时 |
-| `docs/PENDING.md` | 讨论中产生的零散待办 | AI 开工前 |
-| `SPRINTS.md` | Sprint 记录 + Retro | Sprint 边界 |
+| `docs/DESIGN_SPEC.md` | 视觉规范 | 涉及 UI 时 |
+| `docs/status/CURRENT_STATE.md` | 进度快照 | AI 每次新窗口 |
+| `docs/BACKLOG.md` | B-xx 编号待办 | 排期时 |
+| `docs/status/PENDING.md` | 讨论中产生的零散待办 | AI 开工前 |
+| `docs/SPRINTS.md` | Sprint 记录 + Retro | Sprint 边界 |
 
 ---
 
@@ -128,10 +128,10 @@
 
 ---
 
-## 状态同步机制（防人机状态漂移）
+## 九、状态同步机制（防人机状态漂移）
 
 ### 规则 1：多步任务必须有状态文件
-- 任何 3 步以上的任务，AI 先建 docs/tasks/<任务名>.md
+- 任何 3 步以上的任务，AI 先建状态文件（放在 `docs/status/tasks/` 下）
 - 每步有状态：[ ] 未开始 / [~] 进行中 / [x] 完成
 - 人做完后在对话里说，AI 立即更新状态文件
 
@@ -155,10 +155,10 @@
 ## 十、文档同步规则
 
 1. skill 文件增删后，AGENTS.md 的 skill 表不手动改——AI 靠 ls 动态发现
-2. 对 BACKLOG.md 的增删改，必须同时按优先级重排全表（P0 > P1 > P2 > P3）
-3. 对 PENDING.md 的增删改，同步更新"当前暂存"计数
-4. Story 完成后，必须同步更新：SPRINTS.md + CURRENT_STATE.md + PENDING.md
+2. 对 `docs/BACKLOG.md` 的增删改，必须同时按优先级重排全表（P0 > P1 > P2 > P3）
+3. 对 `docs/status/PENDING.md` 的增删改，同步更新"当前暂存"计数
+4. Story 完成后，必须同步更新：`docs/SPRINTS.md` + `docs/status/CURRENT_STATE.md` + `docs/status/PENDING.md`
 5. SPRINTS.md 章节增删时，总览表必须同步（总览表行数 = 章节数）；
-   CURRENT_STATE.md 文档索引变更时，DOCS_INDEX.md 必须同步
+   `docs/status/CURRENT_STATE.md` 文档索引变更时，`docs/DOCS_INDEX.md` 必须同步
 
-*最后更新：2026-09-22*
+*最后更新：2026-10-14*
