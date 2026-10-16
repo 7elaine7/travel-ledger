@@ -38,6 +38,12 @@ AI 把代码生成成本降到极低，但验证、审查、协同的成本没�
 沉淀可复用的方法：story-splitting（拆 Story）、ac-writing（写 AC）、
 code-review（独立评审）等，AI 按需加载。
 
+### 7. 文档与执行分层
+- **方案层**（本地文档）：讨论、规划、方案
+- **执行层**（Gitee）：工作项、状态、迭代
+- **校验层**（快照）：漂移检测
+详见 [docs/WORKFLOW.md](docs/WORKFLOW.md) 第二节。
+
 ## 视觉展示
 
 7 屏手绘风设计（含空状态和列表态）：
@@ -55,7 +61,7 @@ code-review（独立评审）等，AI 按需加载。
 ## 如何运行
 
 浏览器直接打开 `index.html` 即可。
-PWA 离线安装功能待完善。
+PWA 离线安装功能已实现（Manifest + Service Worker），需 http(s) 服务才能启用。
 
 ## 项目状态
 
@@ -63,12 +69,17 @@ PWA 离线安装功能待完善。
 - 记一笔 → 列表 → 筛选 → 导出 → 清空
 - 174 条单元测试全绿
 - 7 屏视觉定稿
+- PWA 离线可用
 
 待续：
-- 编辑/删除功能接回新视觉
+- 编辑/删除功能接回新视觉（S3-09）
+- 载录页表单实装 + 保存链（S4-A / S4-B）
 - 部分已知问题（见 BACKLOG.md）
 
-## 目录结构
+## 执行层
+
+工作项（Epic / Story / Task / Bug / Event）在 Gitee 跟踪：
+https://e.gitee.com/elaine-dev-studio/projects/915516/issues
 
 ## 目录结构
 
@@ -89,10 +100,13 @@ PWA 离线安装功能待完善。
 - `tools/` — 协作脚本
 - `docs/`
   - `DOCS_INDEX.md` — 文档索引
+  - `WORKFLOW.md` — 流程定义
   - `DESIGN_SPEC.md` — 视觉规范
   - `SPRINTS.md` — 迭代记录（含 Retro）
-  - `BACKLOG.md` — 已知问题
+  - `BACKLOG.md` — Product Backlog
+  - `backlog.json` — Gitee 快照（漂移检测用）
   - `status/`
+  - `stories/` — Story 方案文件（intent + spec + plan）
     - `CURRENT_STATE.md` — 状态快照
     - `PENDING.md` — 任务暂存
   - `skills/` — 可复用方法
@@ -110,3 +124,5 @@ PWA 离线安装功能待完善。
 ## License
 
 MIT
+
+*最后更新：2026-10-16*

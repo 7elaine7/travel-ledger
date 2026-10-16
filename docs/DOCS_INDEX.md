@@ -21,25 +21,28 @@
 |---|---|
 | README.md | 项目说明（面试官/新人入口） |
 | AGENTS.md | AI 协作规则（规则层最高优先级） |
+| docs/WORKFLOW.md | 流程定义（阶段流转、待办归位、文档与 Gitee 关系） |
 | docs/status/CURRENT_STATE.md | 当前进度快照 |
 | docs/DOCS_INDEX.md | 本文件——文档地图 |
+| docs/stories/ | 每个 Story 的方案文件（intent + spec + plan + 测试重点），只对未开工/进行中的 Story 建 |
 
 ## 三、事实层（AI 的"事实来源"）
 
 | 文件 | 管什么 |
 |---|---|
-| PROJECT_BRIEF.md | 技术约束（宪法） |
+| PROJECT_BRIEF.md | 技术约束（宪法）+ Epic 列表 + 里程碑 |
 | docs/DESIGN_SPEC.md | 视觉规范（宪法） |
 | docs/status/CURRENT_STATE.md | 进度 |
-| docs/BACKLOG.md | 待办（B-xx 编号） |
-| docs/status/PENDING.md | 讨论中产生的零散待办 |
+| docs/BACKLOG.md | Product Backlog（未拆 Epic / 已拆未排期 Story / B-xx） |
+| docs/status/PENDING.md | 讨论中产生的零散待办（定期清理入 Gitee） |
 | docs/SPRINTS.md | Sprint 记录 + AC + Retro |
+| docs/backlog.json | Gitee 自动快照（漂移检测用，不手工维护） |
 
 ## 四、规则层
 
 | 文件 | 管什么 |
 |---|---|
-| AGENTS.md | AI 硬约束 + 决策授权 + 工作流 |
+| AGENTS.md | AI 硬约束 + 决策授权 + 工作流 + 状态同步 |
 
 ## 五、方法层（Skill）
 
@@ -58,6 +61,7 @@
 |---|---|
 | tools/start-task.sh | 启动新任务 |
 | tools/post-story.sh | Story 完成后同步状态 |
+| tools/snapshot.py | Gitee 快照导出（漂移检测） |
 
 ## 七、经验层（实验记录）
 
@@ -73,3 +77,11 @@
 |---|---|
 | docs/screenshots/ | 已实现页面截图（视觉展示） |
 | docs/methodology/ | 方法论总结 |
+
+## 九、执行层（Gitee）
+
+| 位置 | 内容 |
+|---|---|
+| https://e.gitee.com/elaine-dev-studio/projects/915516/issues | Epic / Story / Task / Bug / Event + 状态 + 迭代归属 |
+
+*最后更新：2026-10-16*

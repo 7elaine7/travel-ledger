@@ -22,6 +22,11 @@
 - `node` / `npm` / `npx` / 无头浏览器 / CDP / 自动化脚本
 - `osascript` / 访问 `~/Library`
 
+**边界说明（2026-10-16）**：
+- `node` / `npm` / `npx` 禁令适用于**项目代码开发**（禁止在项目里跑 Node 脚本、无头浏览器、自动化验证）。
+- **工具链配置**不受此限（如 Gitee MCP 配置、快照脚本、探索性探测）。
+- 判断标准：是否触及项目代码或数据。碰代码 → 禁；纯工具链 → 允许。
+
 **开发纪律**：
 - 改 `js/` 前必说"改哪个函数、改什么"，人确认后再动
 - 每改 3-5 个文件或完成一个 Story 就 commit（中文 message）
@@ -47,12 +52,15 @@
 
 | 文件 | 职责 | 谁读 |
 |---|---|---|
-| `PROJECT_BRIEF.md` | 技术约束（宪法） | AI 开工前 |
+| `PROJECT_BRIEF.md` | 技术约束（宪法）+ Epic 列表 + 里程碑 | AI 开工前 |
 | `docs/DESIGN_SPEC.md` | 视觉规范 | 涉及 UI 时 |
 | `docs/status/CURRENT_STATE.md` | 进度快照 | AI 每次新窗口 |
-| `docs/BACKLOG.md` | B-xx 编号待办 | 排期时 |
+| `docs/BACKLOG.md` | Product Backlog（未拆 Epic / 已拆未排期 Story / B-xx） | 排期时 |
 | `docs/status/PENDING.md` | 讨论中产生的零散待办 | AI 开工前 |
-| `docs/SPRINTS.md` | Sprint 记录 + Retro | Sprint 边界 |
+| `docs/SPRINTS.md` | Sprint 记录 + AC + Retro | Sprint 边界 |
+| `docs/WORKFLOW.md` | 流程定义（阶段流转、待办归位、文档与 Gitee 关系） | Sprint 规划 / Story 启动 / 处理变更 |
+| Gitee | 执行层（工作项 + 状态 + 迭代归属） | 随时 |
+| `docs/stories/` | Story 方案（intent + spec + plan + 测试重点） | Story 启动时 |
 
 ---
 
@@ -150,6 +158,12 @@
 - 人做完后说"X 完成"
 - AI 立即：更新状态文件 + git status 确认
 
+### 规则 5：方案与执行双向可溯（2026-10-16）
+- 本地方案（BACKLOG.md / SPRINTS.md）是 source of truth。
+- Gitee 是执行态，通过 MCP 同步。
+- 定期跑快照脚本对比方案与执行，漂移即报警。
+- 详细规则见 WORKFLOW.md 二「文档与 Gitee 的关系」。
+
 ---
 
 ## 十、文档同步规则
@@ -157,8 +171,8 @@
 1. skill 文件增删后，AGENTS.md 的 skill 表不手动改——AI 靠 ls 动态发现
 2. 对 `docs/BACKLOG.md` 的增删改，必须同时按优先级重排全表（P0 > P1 > P2 > P3）
 3. 对 `docs/status/PENDING.md` 的增删改，同步更新"当前暂存"计数
-4. Story 完成后，必须同步更新：`docs/SPRINTS.md` + `docs/status/CURRENT_STATE.md` + `docs/status/PENDING.md`
+4. Story 完成后，必须同步更新：`docs/SPRINTS.md` + `docs/status/CURRENT_STATE.md` + `docs/status/PENDING.md` + Gitee
 5. SPRINTS.md 章节增删时，总览表必须同步（总览表行数 = 章节数）；
    `docs/status/CURRENT_STATE.md` 文档索引变更时，`docs/DOCS_INDEX.md` 必须同步
 
-*最后更新：2026-10-14*
+*最后更新：2026-10-16*
