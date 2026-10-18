@@ -1,130 +1,75 @@
 # 项目流程定义
 
 > 本文件定义本项目「怎么推进一个任务」。AGENTS.md 管约束（不能做什么），本文件管流程（什么时候做什么）。
-> AGENTS.md 每次开工必读；本文件在「Sprint 规划 / Story 启动 / 处理变更」时读。
-
----
 
 ## 一、项目层级结构
 
 | 层级 | 定义 | 存放位置 |
 |------|------|---------|
-| Epic | 一个大功能方向（如"账户体系"、"表现层迁移"） | `PROJECT_BRIEF.md` 9.1 + Gitee |
-| Story | 能独立验收的最小交付单位（如 S4-A "载录页表单实装"） | `docs/SPRINTS.md` + Gitee |
-| Task | Story 内的具体执行步骤（如"改 parser.js"、"写 3 条单测"） | Gitee（持久化） |
+| Epic | 大功能方向（骨架），可跨多个 Sprint | `BACKLOG.md` 的 Epic 池 |
+| Story | 能独立验收的交付单位 | `BACKLOG.md` 的候选池（未排期） / `SPRINTS.md`（已排期） |
+| Task | Story 内的具体执行步骤 | Gitee（持久化） |
 
-**层级关系**：Epic → Story → Task。
+**核心原则**：
+1. **Epic 不是排期的单位，Story 才是。** 一个 Epic 会横跨多个 Sprint（如 E-02 跨越 Sprint 1 和 Sprint 4）。同一个 Epic 下的不同 Story，优先级可以完全不同。
+2. **Sprint 是从候选池里选 Story，而不是选 Epic。**
+3. **单人项目执行策略**：Sprint 开始前，确认所有 Story，并统一拆完所有 Task。Sprint 执行期间，不再轻易变更 Task。
 
-**本项目实际执行粒度 = Task 级**。Story 是交付单位，Task 是干活单位。
-
-**单人项目 = 一个 Story 一个迭代**：一次只做一个 Story，避免多 Agent 撞车。多 Agent 并行只在 Story 内部（代码 Agent + 独立测试 Agent）。
-
-**Task 持久化**：Task 不再用完即删。每个 Story 启动时拆出的 Task，全部持久化到 Gitee 工作项。
-
-### Gitee 工作项类型结构
-
-- **需求（大类）**
-  - Epic（顶层）
-  - Story（挂 Epic 下）
-  - Task（挂 Story 下）
-- **任务（大类）**
-  - Bug（缺陷）
-  - Event（无法归 Story 的独立任务）
-
-### Bug 归属规则
-
-- Story 开发中发现的 Bug → 挂该 Story 下，关闭前必修
-- 跨 Story 的技术债和历史遗留（B-xx）→ 独立，按 Epic 归类或独立存在
-- gate 级风险（发布阻断）→ 独立 + `gate` 标签
+**Gitee 工作项类型结构**：
+- **需求（大类）**：Epic（顶层） → Story（挂 Epic 下） → Task（挂 Story 下）
+- **任务（大类）**：Bug（缺陷） / Event（独立任务）
 
 ---
 
 ## 二、文档与 Gitee 的关系
 
-### 三层架构
-
 | 层 | 内容 | 维护方式 |
 |---|---|---|
-| 方案层（source of truth） | BACKLOG.md / SPRINTS.md / PROJECT_BRIEF.md | AI 维护，人审 diff 后确认 |
+| 方案层（source of truth） | BACKLOG.md（需求池）/ SPRINTS.md（迭代计划）/ PROJECT_BRIEF.md（宪法） | AI 维护，人审 diff 后确认 |
 | 执行层（Gitee） | Epic / Story / Task / Bug / Event + 状态 | AI 通过 MCP 同步 |
-| 校验层（漂移检测） | SNAPSHOT.json（Gitee 实际状态） | 脚本定期导出，对比本地方案，输出漂移报告 |
+| 校验层（漂移检测） | SNAPSHOT.json（Gitee 实际状态） | 脚本定期导出，对比本地方案 |
 
-**流向**：方案层 → 执行层（MCP 同步）；执行层 → 校验层（脚本快照）；校验层对比方案层（漂移检测）。
+**原则**：文档是方案，Gitee 是执行。方案 → Gitee 单向同步。本地 BACKLOG.md 作为保底收敛。
 
-### 原则
-
-1. **文档是方案，Gitee 是执行**。先有方案，才有执行。
-2. **方案 → Gitee 单向同步**（AI 通过 MCP 执行）。
-3. **Gitee 的执行状态不反向污染文档的方案**。
-4. **本地 BACKLOG.md 保底收敛**：成熟后可直接用 Gitee，但保留本地汇总源头，防止 AI 出错时问题散落不可收敛。
-5. **快照脚本专用于保险**（漂移检测），不用于同步。
-
-### 同步与对比的工具分工
-
-| 动作 | 工具 | 方向 |
-|---|---|---|
-| 同步（方案 → Gitee） | MCP（AI 直接调） | 单向 |
-| 对比（本地 ↔ Gitee） | Python 脚本 | 双向检测 |
-
-### 各文件定位
-
-| 文件 | 层 | 职责 |
-|---|---|---|
-| PROJECT_BRIEF.md | 方案 | 项目宪法 + Epic 列表 + 里程碑 |
-| SPRINTS.md | 方案 | Sprint 规划（Epic → Story → Task 结构）+ AC + Retro |
-| BACKLOG.md | 方案 | Product Backlog：未拆 Epic / 已拆未排期 Story / B-xx |
-| PENDING.md | 方案 | 零散暂存 |
-| WORKFLOW.md | 方案 | 流程定义 |
-| Gitee | 执行 | 工作项挂载 + 状态 + 迭代归属 |
-| SNAPSHOT.json | 校验 | Gitee 自动快照，漂移检测 |
-| stories/ | 方案 | 每个 Story 的 intent + spec + plan + 测试重点 |
-
-### Product Backlog 结构
-
-BACKLOG.md 分三块：
-
-1. **未拆的 Epic**（粗粒度）
-2. **已拆未排期的 Story**（必须带 parent Epic）
-3. **已知问题（B-xx）**——未修
-
-已修 / 已关闭 / 设计决定归入「归档」区块。
+**各文件定位**：
+- `PROJECT_BRIEF.md`：项目宪法 + 宏观目标（不维护详细的 Epic 和 Sprint 计划）。
+- `BACKLOG.md`：Product Backlog（需求池）。包含：未拆的 Epic + 已拆的 Story 候选池 + B-xx 待办。
+- `SPRINTS.md`：Sprint 规划（本迭代的 Story 列表 / AC / 完成记录）。
+- `PENDING.md`：零散暂存。
+- `Gitee`：执行层工作项。
 
 ---
 
 ## 三、拆解时机
 
-### 时机 1：Epic 拆 Story（Sprint 规划时）
+### 时机 1：Epic 拆 Story（临近排期时，提前 1-2 个 Sprint）
 
 **谁做**：人 + 主 AI
-**时机**：Sprint 规划会，**提前 1-2 个迭代拆**
+**时机**：该 Epic 预计在 1-2 个 Sprint 内要启动时。
 **动作**：
-1. 从 `PROJECT_BRIEF.md` 9.1 选本次要做的 Epic
-2. 拆成多个 Story（每个 Story 可独立验收）
-3. 每个 Story 写 AC（可 grep 验证）
-4. 更新 `docs/SPRINTS.md` 和 Gitee
-
-**产出**：Sprint 的 Story 列表 + 每个 Story 的 AC
+1. 从 `BACKLOG.md` 的「Epic 流动池」中，挑出临近排期的 Epic。
+2. 将其拆解为多个 Story（每个 Story 可独立验收）。
+3. 每个 Story 写 AC、评估依赖、定优先级。
+4. 将这些 Story 放入 `BACKLOG.md` 的「Story 候选池」。
+5. 如果 Epic 彻底拆完，从流动池标记为已拆解。
 
 **约束**：
-- 每个 Story 必须能独立验收
-- **Story 必须能在一个 Sprint 内独立验收，不跨迭代**
-- AC 必须可验证、无模糊词
+- Story 必须能独立验收（Independent）。
+- Story 必须对用户有价值（Valuable）。
+- Story 必须足够小，一个迭代内能完成（Small）。
+- AC 必须可验证、无模糊词。
 
-### 时机 2：Story 拆 Task（Story 启动时）
+### 时机 2：Story 拆 Task（Sprint 规划时，Sprint 启动前）
 
 **谁做**：主 AI 出计划，人确认
-**时机**：Story 启动
+**时机**：Sprint 启动前（与 Story 选入 Sprint 同步完成）。
 **动作**：
-1. 主 AI 读 Story + AC + 相关代码
-2. 出实现计划（Task 列表 + 顺序 + 风险 + 证明测试）
-3. 人确认计划
-4. Task 全部录入 Gitee（挂对应 Story 下）
+1. 主 AI 读本次 Sprint 选中的所有 Story + AC + 相关代码。
+2. 一次性出所有 Story 的实现计划（Task 列表 + 顺序 + 风险 + 证明测试）。
+3. 人确认计划。
+4. Task 全部录入 Gitee（挂对应 Story 下）。
 
-**产出**：Task 级计划（持久化到 Gitee）
-
-**约束**：
-- 计划未确认，不许开始写代码
-- 计划必须包含"证明测试"
+**约束**：计划未确认，不许写代码。Task 是执行最小单位，Sprint 启动后不允许随意变更。
 
 ---
 
@@ -142,131 +87,88 @@ BACKLOG.md 分三块：
 
 ## 五、阶段流转（Story 启动到关闭）
 
-| 阶段 | 输入 | 动作 | 产出 | 触发下一步 |
-|------|------|------|------|-----------|
-| 1. Plan | Story + AC | 主 AI 出计划，人确认 | plan（Task 列表 + 风险 + 测试）→ 录入 Gitee | 人确认后进入 Build |
-| 2. Build | 已确认的 Plan | 执行 AI 写代码 + 单测 | Diff + 单元测试 | 本地自测全绿 |
-| 3. Test | 代码 + AC | 人浏览器验收 + 独立 Review | 验收记录 + review 报告 | 人确认通过 |
-| 4. 合入 | 通过验收的改动 | commit + 更新文档 + 更新 Gitee 状态 | Git commit + Gitee 状态更新 | Story 关闭 |
-| 5. 关闭 | 合入完成 | 更新 SPRINTS + 提取经验 | 完成记录 | 进入下一个 Story |
+| 阶段 | 动作 | 产出 |
+|------|------|-----------|
+| 1. Plan | 规划阶段确认 Task（记录在 SPRINTS） | SPRINTS.md 中的 Task 列表 |
+| 2. Build | 执行 AI 写代码 + 单测 | Diff + 单元测试 |
+| 3. Test | 人浏览器验收 + 独立 Review | 验收记录 + review 报告 |
+| 4. 合入 | commit + 更新文档 + 更新 Gitee 状态 | Git commit + Gitee 更新 |
+| 5. 关闭 | 更新 SPRINTS + 提取经验 | 完成记录 |
 
-**约束**：禁止跳阶段。Plan 未确认，不许开始写代码。
+**约束**：禁止跳阶段。Sprint 启动前 Task 必须定死。
 
 ---
 
 ## 六、完成定义（DoD）
 
 **Story 完成的标准 = 以下全部满足**：
-
-| # | 条件 | 验证方式 |
-|---|------|---------|
-| 1 | Plan 已确认 | 人签字（L3） |
-| 2 | 代码完成 + 单测全绿 | 人手动跑 `tests/tests.html` |
-| 3 | AC 全部通过 | 人浏览器验收 |
-| 4 | 独立 Review 通过 | 冷启动 Review 报告 |
-| 5 | 改动已 commit | `git log` 可查 |
-| 6 | 文档已同步 | SPRINTS + CURRENT_STATE + PENDING 更新 |
-| 7 | 验收记录已写 | 一段简短记录，含改动要点 |
+1. 所有 Task 已确认完成（Gitee 状态核对）
+2. 代码完成 + 单测全绿（人手动跑 `tests/tests.html`）
+3. AC 全部通过（人浏览器验收）
+4. 独立 Review 通过（冷启动）
+5. 改动已 commit
+6. 文档已同步（SPRINTS / CURRENT_STATE / PENDING）
+7. 验收记录已写
 
 **7 条全满足，Story 才算关闭。**
-
-**Task 完成的标准**（比 Story 轻）：
-- 代码写完
-- 相关单测通过
-- 不破坏其他 Task
-
-**Story 关闭 = 所有 Task 完成 + DoD 7 条满足。**
+**Task 完成标准**：代码写完 + 单测通过 + 不破坏其他 Task。
 
 ---
 
 ## 七、待办归位链
 
-三类待办容器，职责严格区分：
-
 | 容器 | 职责 | 存放位置 | 更新时机 |
 |------|------|---------|---------|
-| PENDING | 讨论中冒出的零散任务 | `docs/status/PENDING.md` | 随时 |
-| BACKLOG | Product Backlog（未拆 Epic + 已拆未排期 Story + B-xx） | `docs/BACKLOG.md` | Sprint 规划时清理 |
-| SPRINTS | 本 Sprint 的 Story + AC + Task 结构 | `docs/SPRINTS.md` | Sprint 规划会 + Story 关闭时 |
+| PENDING | 零散任务 | `PENDING.md` | 随时 |
+| BACKLOG | 需求池（未拆 Epic + 未排期 Story + 未排期问题） | `BACKLOG.md` | Sprint 规划时清理 |
+| SPRINTS | 本 Sprint 的 Story + AC + **Task 计划** + 完成记录 | `SPRINTS.md` | Sprint 规划会 + Story 关闭时 |
 
-**归位链**：PENDING → BACKLOG → SPRINTS → Task（Gitee）。
-
-**归位终点是 Gitee**：PENDING 和 BACKLOG 清理后，最终转入 Gitee 工作项。BACKLOG.md 保留为方案视图（分三块），Gitee 是执行态。
-
-**PENDING 的清理时机 = Sprint 规划时**，不是开工时。
-
-**开工时读哪个**：
-- 主读 `docs/SPRINTS.md`（这次做什么）
-- **不读 PENDING**（它是待清理的暂存区，不是当前任务来源）
+**归位链**：PENDING → BACKLOG（候选池） → SPRINTS（选定 Story，并在 `.md` 中拆解出 Task，确认迭代目标列表） → Gitee（执行 Task）。
 
 ---
 
 ## 八、变更处理流程
 
-突发变更（新需求、高优先级 bug、外部依赖变化）进来时：
+无论是新增需求、高优先级 Bug，还是对当前 Sprint 已有 Story/Task 的修改，统一走以下流程：
 
-### 步骤 1：先入 PENDING 或 BACKLOG
+### 步骤 1：登记并评估
+- 评估该变更对当前 Sprint 目标的影响。
+- 如果导致当前 Sprint 无法完成，或当前 Story 优先级降低，**直接将原 Story 或任务踢回 `BACKLOG.md` 重新排队**，保护当前 Sprint 范围的稳定（拒绝范围蠕动）。
 
-| 变更类型 | 登记位置 |
-|---------|---------|
-| 小改动、影响当前 Story | PENDING |
-| 独立新需求、独立 bug | BACKLOG |
+### 步骤 2：进入 BACKLOG 重新竞争
+- 所有被踢回的、或新来的变更，一律进入 `BACKLOG.md`。
+- 在 Sprint 规划时，按优先级重新和池子里的其他项竞争。
 
-### 步骤 2：Sprint 规划时评估优先级
-
-| 优先级 | 处理方式 |
-|--------|---------|
-| P3 / P2 | 排到后续 Sprint |
-| P1 | 插入当前 Sprint 尾部 |
-| P0（极紧急） | **触发修改当前 Sprint 计划** |
-
-### 步骤 3：P0 变更需人拍板
-
-**属于 L3 决策，必须人拍板**：
-
-1. 主 AI 评估影响：会影响哪些进行中的 Story
-2. 人拍板：插入 / 暂停当前 Story / 调整 Sprint 目标
-3. 更新 `docs/SPRINTS.md` + `docs/status/CURRENT_STATE.md` + Gitee
-
-**禁止**：未经人拍板，AI 不得修改 SPRINT 计划。
+### 步骤 3：P0 紧急变更的人拍板
+- 如果是极端紧急的线上 Bug（P0），属于 L3 决策，由人直接拍板插队进入当前 Sprint。
+- 必须更新 `SPRINTS.md` + `CURRENT_STATE.md` + Gitee。
 
 ---
 
 ## 九、人在流程中的介入点
 
-按 AGENTS.md 第八节的 L1-L4 决策分级：
-
 | 介入点 | 级别 | 动作 |
 |--------|------|------|
-| Sprint 规划：Epic 拆 Story | L3 | 确认拆解合理、AC 可验证 |
-| Story 启动：Plan 确认 | L3 | 确认实现计划可行 |
+| Sprint 规划：Story 选入与 Task 拆解 | L3 | 确认 Story 与 Task 合理 |
 | Story 验收 | L3 | 浏览器实测，判断 AC 是否满足 |
-| Sprint 计划变更 | L3 | P0 变更、优先级调整 |
+| Sprint 计划变更（如踢回旧任务、P0插队） | L3 | P0 变更、优先级调整 |
 | 不可逆操作 | L4 | 人 + 会签 |
 
-**每个 Story 三个闸门**：
-1. **Plan Gate**：确认 AI 的计划
-2. **Review Gate**：验收 AI 的产出
-3. **Close Gate**：确认 DoD 满足
-
-**其他时间**：AI 端到端跑，人只在上述节点出现。
+**每个 Story 三个闸门**：Plan Gate（规划时） / Review Gate（验收时） / Close Gate（关闭时）。
 
 ---
 
 ## 十、Sprint 边界动作
 
-每次 Sprint 结束时，按顺序做：
-
-| # | 动作 | 产出 |
-|---|------|------|
-| 1 | 检查 PENDING，清理入 BACKLOG | 更新 PENDING + BACKLOG |
-| 2 | 检查 BACKLOG，按优先级重排 | 更新 BACKLOG |
-| 3 | 回顾本次 Sprint，写 Retro | 更新 SPRINTS 的 Retro 章节 |
-| 4 | 提取可复用方法 | 沉淀到 docs/skills/ |
-| 5 | 规划下个 Sprint：从 PROJECT_BRIEF 9.1 选 Epic，拆 Story | 更新 SPRINTS + Gitee |
-| 6 | 同步 Gitee：新建/更新工作项 | Gitee 执行态刷新 |
-
-**PENDING 清理发生在第 1 步——Sprint 边界。**
+1. 检查 PENDING，清理入 BACKLOG。
+2. 检查 BACKLOG，按优先级重排。
+3. 回顾本次 Sprint，写 Retro。
+4. 提取可复用方法沉淀到 docs/skills/。
+5. **规划下个 Sprint**：
+   - **步骤 A**：检查 `BACKLOG.md` 的 Epic 池，如果里面有临近排期的 Epic，先将其拆成 Story 放入候选池，并排好优先级。
+   - **步骤 B**：从候选池（包含 Story 和问题）中，按优先级选出下个 Sprint 要做的内容。
+6. 为选中的 Story 出实现计划，**拆完所有 Task 并写入 `SPRINTS.md`**。
+7. 同步 Gitee：建立迭代，将选中的 Story 和 Task 刷新到 Gitee。
 
 ---
 
@@ -275,29 +177,20 @@ BACKLOG.md 分三块：
 | 文档 | 关系 |
 |------|------|
 | AGENTS.md | 管约束；本文件管流程 |
-| PROJECT_BRIEF.md | 管技术约束 + 测试规则（6.5）+ Epic 列表（9.1）+ 里程碑（9.3） |
-| docs/SPRINTS.md | 本文件"待办归位链"目标容器（方案层） |
-| docs/BACKLOG.md | 本文件"待办归位链"入口（Product Backlog） |
-| docs/status/PENDING.md | 本文件"待办归位链"起点 |
-| docs/skills/ | 本文件"阶段流转"过程中按任务类型加载 |
-| tools/*.sh | 本文件"启动 / 收尾"动作的自动化脚本 |
-| Gitee | 执行层（见第二节） |
-| SNAPSHOT.json | 校验层（见第二节） |
+| PROJECT_BRIEF.md | 项目宪法 + 宏观目标 |
+| docs/SPRINTS.md | Sprint 迭代计划（方案层） |
+| docs/BACKLOG.md | Product Backlog（未拆 Epic + 未排期story + 未排期问题） |
+| docs/status/PENDING.md | 零散暂存区 |
+| Gitee | 执行层 |
+| SNAPSHOT.json | 校验层 |
 
 ---
 
 ## 十二、一句话
 
 **AGENTS.md 管红线，本文件管路线。**
+**Epic 拆 Story 在临近排期时；Story 选入 Sprint 在 Sprint 规划时；Story 拆 Task 在 Sprint 启动前。**
+**Sprint 排期选的是 Story，不是 Epic。所有变更退回 Backlog 重新排队。**
+**DoD 7 条满足，Story 才算关闭。**
 
-**层级：Epic（PROJECT_BRIEF 9.1）→ Story（SPRINTS）→ Task（Gitee）。**
-
-**Epic 拆 Story 在 Sprint 规划时；Story 拆 Task 在 Story 启动时。**
-
-**PENDING 在 Sprint 规划时清理；开工不读 PENDING。**
-
-**DoD 7 条满足，Story 才算关闭。三个闸门：Plan Gate / Review Gate / Close Gate。**
-
-**方案层（文档）→ 执行层（Gitee）→ 校验层（快照），单向同步，双向检测。**
-
-*最后更新：2026-10-16*
+*最后更新：2026-10-18*

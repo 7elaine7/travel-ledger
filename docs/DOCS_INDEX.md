@@ -15,28 +15,43 @@
 | assets/ | 项目资源（字体、印章、分类图标、背景图） |
 | icons/ | PWA 图标 |
 
-## 二、入口层（每次开工先读）
+## 二、入口层（开工必读与任务导航）
+
+### 1. 每次新窗口强制必读（最小集，与 AGENTS.md 一致）
+
+| 文件 | 作用 |
+|---|---|
+| AGENTS.md | AI 协作规则（最高指令，含「开工前必做 3 步」） |
+| PROJECT_BRIEF.md | 重点读第 8.3 条（测试基线与禁自动化硬约束） |
+| docs/status/CURRENT_STATE.md | 当前进度快照（昨天做到哪了，今天做什么） |
+| docs/status/PENDING.md | 零散待办暂存区（看当前暂存） |
+
+### 2. 按任务场景强制触发阅读（干活前必看）
+
+| 触发场景 | 必读文件 |
+|---|---|
+| 涉及流程、排期、拆分、验收 | docs/WORKFLOW.md（阶段流转、DoD、待办归位、文档与 Gitee 关系） |
+| 开始执行某个 Story | docs/stories/<Story编号>.md（intent + spec + plan） |
+| 不知道该调用什么方法 | docs/skills/ 下的对应 skill 文件（拆解/测试/回顾） |
+| 涉及视觉/UI 开发 | docs/DESIGN_SPEC.md（视觉宪法） |
+
+### 3. 项目信息入口（给新人/面试官看，AI 找信息时查）
 
 | 文件 | 作用 |
 |---|---|
 | README.md | 项目说明（面试官/新人入口） |
-| AGENTS.md | AI 协作规则（规则层最高优先级） |
-| docs/WORKFLOW.md | 流程定义（阶段流转、待办归位、文档与 Gitee 关系） |
-| docs/status/CURRENT_STATE.md | 当前进度快照 |
 | docs/DOCS_INDEX.md | 本文件——文档地图 |
-| docs/stories/ | 每个 Story 的方案文件（intent + spec + plan + 测试重点），只对未开工/进行中的 Story 建 |
 
 ## 三、事实层（AI 的"事实来源"）
 
 | 文件 | 管什么 |
 |---|---|
-| PROJECT_BRIEF.md | 技术约束（宪法）+ Epic 列表 + 里程碑 |
+| PROJECT_BRIEF.md | 技术约束（宪法）+ 宏观目标 |
 | docs/DESIGN_SPEC.md | 视觉规范（宪法） |
-| docs/status/CURRENT_STATE.md | 进度 |
-| docs/BACKLOG.md | Product Backlog（未拆 Epic / 已拆未排期 Story / B-xx） |
+| docs/status/CURRENT_STATE.md | 进度快照 |
+| docs/BACKLOG.md | Product Backlog（需求池：未拆 Epic 池 / Story 候选池 / 未排期问题池） |
 | docs/status/PENDING.md | 讨论中产生的零散待办（定期清理入 Gitee） |
-| docs/SPRINTS.md | Sprint 记录 + AC + Retro |
-| docs/backlog.json | Gitee 自动快照（漂移检测用，不手工维护） |
+| docs/SPRINTS.md | Sprint 目标 + Story 列表 + AC + Task 计划 + 完成记录 |
 
 ## 四、规则层
 
@@ -84,4 +99,4 @@
 |---|---|
 | https://e.gitee.com/elaine-dev-studio/projects/915516/issues | Epic / Story / Task / Bug / Event + 状态 + 迭代归属 |
 
-*最后更新：2026-10-16*
+*最后更新：2026-10-18*

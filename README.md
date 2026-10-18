@@ -29,19 +29,19 @@ AI 把代码生成成本降到极低，但验证、审查、协同的成本没�
 迭代超限 / 改动量连续上升 / 超时 → 强制交人。
 解决"AI 陷入死循环，无限消耗"的问题。
 
-### 5. 文档驱动流程
-从 Epic 拆解到 Story，单 Story 经过 intent → spec → plan 三段式审批后，
-进入自动化交付流程至验收。
-详见 [docs/methodology/](docs/methodology/)。
+### 5. 文档驱动与渐进明细
+构建了 `Epic → Story → Task` 三层拆解体系。
+**Sprint 排期选的是 Story，Task 必须在 Sprint 启动前全部拆完并锁定**。
+单 Story 经过 intent → spec → plan 三段式审批后，进入自动化交付流程至验收。详见 [docs/methodology/](docs/methodology/)。
 
 ### 6. Skill 模板库
 沉淀可复用的方法：story-splitting（拆 Story）、ac-writing（写 AC）、
 code-review（独立评审）等，AI 按需加载。
 
-### 7. 文档与执行分层
-- **方案层**（本地文档）：讨论、规划、方案
-- **执行层**（Gitee）：工作项、状态、迭代
-- **校验层**（快照）：漂移检测
+### 7. 方案与执行分层
+- **方案层**（本地文档）：`PROJECT_BRIEF`（宪法）、`BACKLOG`（需求池）、`SPRINTS`（迭代计划）。
+- **执行层**（Gitee）：工作项状态、挂载关系、迭代归属，通过 MCP 由 AI 维护。
+- **校验层**（快照）：未来通过 Python 脚本定期导出快照 漂移检测，防止执行与方案脱节。
 详见 [docs/WORKFLOW.md](docs/WORKFLOW.md) 第二节。
 
 ## 视觉展示
@@ -61,7 +61,7 @@ code-review（独立评审）等，AI 按需加载。
 ## 如何运行
 
 浏览器直接打开 `index.html` 即可。
-PWA 离线安装功能已实现（Manifest + Service Worker），需 http(s) 服务才能启用。
+PWA 离线安装功能已实现（Manifest + Service Worker），需 `http(s)` 服务才能启用。
 
 ## 项目状态
 
@@ -74,7 +74,7 @@ PWA 离线安装功能已实现（Manifest + Service Worker），需 http(s) 服
 待续：
 - 编辑/删除功能接回新视觉（S3-09）
 - 载录页表单实装 + 保存链（S4-A / S4-B）
-- 部分已知问题（见 BACKLOG.md）
+- 部分已知问题（见 BACKLOG.md 的问题池）
 
 ## 执行层
 
@@ -85,7 +85,7 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
 
 - `README.md` — 项目说明（本文件）
 - `AGENTS.md` — AI 协作规则
-- `PROJECT_BRIEF.md` — 项目宪法
+- `PROJECT_BRIEF.md` — 项目宪法（技术硬约束、数据模型、方法论）
 - `index.html` — 应用入口
 - `manifest.json` — PWA 配置
 - `sw.js` — Service Worker
@@ -100,15 +100,14 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
 - `tools/` — 协作脚本
 - `docs/`
   - `DOCS_INDEX.md` — 文档索引
-  - `WORKFLOW.md` — 流程定义
+  - `WORKFLOW.md` — 流程定义（拆解时机、DoD、待办归位）
   - `DESIGN_SPEC.md` — 视觉规范
-  - `SPRINTS.md` — 迭代记录（含 Retro）
-  - `BACKLOG.md` — Product Backlog
-  - `backlog.json` — Gitee 快照（漂移检测用）
+  - `SPRINTS.md` — Sprint 计划与记录（含 Story 列表 / AC / Task 计划 / Retro）
+  - `BACKLOG.md` — 需求池（未拆 Epic / 候选 Story / B-xx 问题池）
   - `status/`
-  - `stories/` — Story 方案文件（intent + spec + plan）
     - `CURRENT_STATE.md` — 状态快照
     - `PENDING.md` — 任务暂存
+  - `stories/` — Story 方案文件（intent + spec + plan + 测试重点）
   - `skills/` — 可复用方法
   - `experiments/` — 实验记录
   - `methodology/` — 方法论总结
@@ -125,4 +124,4 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
 
 MIT
 
-*最后更新：2026-10-16*
+*最后更新：2026-10-18*

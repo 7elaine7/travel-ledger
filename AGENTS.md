@@ -7,7 +7,7 @@
 
 ## 一、开工前必做（3 步）
 
-1. 读 `PROJECT_BRIEF.md` 第 6.5-D 条（禁 node/npm/无头浏览器/自动化脚本）
+1. 读 `PROJECT_BRIEF.md` 第 8.3 条（测试基线与禁自动化规则）
 2. 读 `docs/status/CURRENT_STATE.md`（当前进度快照）
 3. 读本文件全部规则 + `docs/status/PENDING.md` 的"当前暂存"
 
@@ -52,13 +52,13 @@
 
 | 文件 | 职责 | 谁读 |
 |---|---|---|
-| `PROJECT_BRIEF.md` | 技术约束（宪法）+ Epic 列表 + 里程碑 | AI 开工前 |
+| `PROJECT_BRIEF.md` | 技术约束（宪法）+ 宏观目标 | AI 开工前 |
 | `docs/DESIGN_SPEC.md` | 视觉规范 | 涉及 UI 时 |
 | `docs/status/CURRENT_STATE.md` | 进度快照 | AI 每次新窗口 |
-| `docs/BACKLOG.md` | Product Backlog（未拆 Epic / 已拆未排期 Story / B-xx） | 排期时 |
+| `docs/BACKLOG.md` | Product Backlog（未拆 Epic 池 / Story 候选池 / 问题池） | 排期时 |
 | `docs/status/PENDING.md` | 讨论中产生的零散待办 | AI 开工前 |
-| `docs/SPRINTS.md` | Sprint 记录 + AC + Retro | Sprint 边界 |
-| `docs/WORKFLOW.md` | 流程定义（阶段流转、待办归位、文档与 Gitee 关系） | Sprint 规划 / Story 启动 / 处理变更 |
+| `docs/SPRINTS.md` | Sprint 目标 + Story 列表 + AC + Task 计划 + 完成记录 | Sprint 规划 / Story 启动 |
+| `docs/WORKFLOW.md` | 流程定义（拆解时机、待办归位、文档与 Gitee 关系） | Sprint 规划 / Story 启动 / 处理变更 |
 | Gitee | 执行层（工作项 + 状态 + 迭代归属） | 随时 |
 | `docs/stories/` | Story 方案（intent + spec + plan + 测试重点） | Story 启动时 |
 
@@ -172,7 +172,7 @@
 2. 对 `docs/BACKLOG.md` 的增删改，必须同时按优先级重排全表（P0 > P1 > P2 > P3）
 3. 对 `docs/status/PENDING.md` 的增删改，同步更新"当前暂存"计数
 4. Story 完成后，必须同步更新：`docs/SPRINTS.md` + `docs/status/CURRENT_STATE.md` + `docs/status/PENDING.md` + Gitee
-5. SPRINTS.md 章节增删时，总览表必须同步（总览表行数 = 章节数）；
-   `docs/status/CURRENT_STATE.md` 文档索引变更时，`docs/DOCS_INDEX.md` 必须同步
+5. `docs/SPRINTS.md` 新增 Sprint 时，必须按时间倒序排列（最新的在最上方）；
+   `docs/status/CURRENT_STATE.md` 文档索引变更时，`docs/DOCS_INDEX.md` 必须同步。
 
-*最后更新：2026-10-16*
+*最后更新：2026-10-18*
