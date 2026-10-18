@@ -29,19 +29,20 @@ AI 把代码生成成本降到极低，但验证、审查、协同的成本没�
 迭代超限 / 改动量连续上升 / 超时 → 强制交人。
 解决"AI 陷入死循环，无限消耗"的问题。
 
-### 5. 文档驱动与渐进明细
-构建了 `Epic → Story → Task` 三层拆解体系。
-**Sprint 排期选的是 Story，Task 必须在 Sprint 启动前全部拆完并锁定**。
-单 Story 经过 intent → spec → plan 三段式审批后，进入自动化交付流程至验收。详见 [docs/methodology/](docs/methodology/)。
+### 5. 双 Agent 编排与自动化工作流
+构建了 `Epic → Story → Task` 的三层渐进明细体系，并设计了**两层自动化工作流**：
+- **需求级工作流**：主 Agent 负责拆解与排期，自动将状态同步至 Gitee 执行层。
+- **Story 闭环工作流**：主 Agent 担任 Orchestrator 编排器，经过 `intent → spec → plan` 三段式审批后，自动驱动执行 Agent（ZCode）编码、生成单测、同步文档，直至人工验收。
+**Sprint 排期选的是 Story，Task 必须在 Sprint 启动前全部拆完并锁定**，以保证迭代期间不受范围蔓延影响。详见 [docs/WORKFLOW.md](docs/WORKFLOW.md) 第三节。
 
-### 6. Skill 模板库
-沉淀可复用的方法：story-splitting（拆 Story）、ac-writing（写 AC）、
-code-review（独立评审）等，AI 按需加载。
+### 6. Skill 模板库与对照实验
+- **Skill 模板库**：沉淀可复用的方法（拆 Story、写 AC、独立评审等），AI 按需加载。
+- **对照实验**：沉淀了 3 组核心实验（AI 协作流程对照、状态管理 JSON vs Markdown、测试设计单 vs 双 Agent），用真实数据验证方法论。详见 [docs/experiments/](docs/experiments/)。
 
 ### 7. 方案与执行分层
 - **方案层**（本地文档）：`PROJECT_BRIEF`（宪法）、`BACKLOG`（需求池）、`SPRINTS`（迭代计划）。
 - **执行层**（Gitee）：工作项状态、挂载关系、迭代归属，通过 MCP 由 AI 维护。
-- **校验层**（快照）：未来通过 Python 脚本定期导出快照 漂移检测，防止执行与方案脱节。
+- **校验层**（快照）：未来通过 Python 脚本定期导出快照进行漂移检测，防止执行与方案脱节。
 详见 [docs/WORKFLOW.md](docs/WORKFLOW.md) 第二节。
 
 ## 视觉展示
@@ -109,8 +110,7 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
     - `PENDING.md` — 任务暂存
   - `stories/` — Story 方案文件（intent + spec + plan + 测试重点）
   - `skills/` — 可复用方法
-  - `experiments/` — 实验记录
-  - `methodology/` — 方法论总结
+  - `experiments/` — 对照实验记录（AI 流程、状态管理、测试设计）
   - `screenshots/` — 视觉展示
 
 ## 技术栈
