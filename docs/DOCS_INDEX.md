@@ -76,7 +76,7 @@
 |---|---|
 | tools/start-task.sh | 启动新任务 |
 | tools/post-story.sh | Story 完成后同步状态 |
-| tools/snapshot.py | Gitee 快照导出（漂移检测） |
+| tools/snapshot.py | Gitee 快照导出（规划中，待实现） |
 
 ## 七、经验层（实验记录）
 
@@ -86,12 +86,12 @@
 | docs/experiments/实验二-状态管理对照.md | JSON vs Markdown 状态管理对照 |
 | docs/experiments/实验三-测试设计对照.md | 单 Agent vs 双 Agent 测试设计对照 |
 
-## 八、素材层
+## 八、素材与方法层
 
 | 目录 | 内容 |
 |---|---|
 | docs/screenshots/ | 已实现页面截图（视觉展示） |
-| docs/methodology/ | 方法论总结 |
+| docs/methodology/AI_NATIVE_AGILE_PLAYBOOK.md | **核心方法论**：AI 原生敏捷、验证税、L1-L4 授权与流程演进推演 |
 
 ## 九、执行层（Gitee）
 
@@ -99,4 +99,4 @@
 |---|---|
 | https://e.gitee.com/elaine-dev-studio/projects/915516/issues | Epic / Story / Task / Bug / Event + 状态 + 迭代归属 |
 
-*最后更新：2026-10-18*
+*最后更新：2026-10-22*

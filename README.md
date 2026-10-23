@@ -11,6 +11,15 @@ AI 把代码生成成本降到极低，但验证、审查、协同的成本没�
 
 所以我用 AI 完整跑了一遍从需求到交付的流程，并把过程中的机制沉淀下来。
 
+---
+
+## 📖 核心阅读：AI 原生敏捷方法论与工作推演
+
+本实验沉淀的核心方法论、协作机制与未来演进推演，统一归档于以下文档，可直接阅读：
+👉 **[docs/methodology/AI_NATIVE_AGILE_PLAYBOOK.md](docs/methodology/AI_NATIVE_AGILE_PLAYBOOK.md)**
+
+---
+
 ## 核心产出
 
 ### 1. 决策分级 L1-L4
@@ -111,6 +120,7 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
   - `stories/` — Story 方案文件（intent + spec + plan + 测试重点）
   - `skills/` — 可复用方法
   - `experiments/` — 对照实验记录（AI 流程、状态管理、测试设计）
+  - **`methodology/` — 核心方法论（AI 原生敏捷与工作推演）**
   - `screenshots/` — 视觉展示
 
 ## 技术栈
@@ -124,4 +134,4 @@ https://e.gitee.com/elaine-dev-studio/projects/915516/issues
 
 MIT
 
-*最后更新：2026-10-18*
+*最后更新：2026-10-22*
